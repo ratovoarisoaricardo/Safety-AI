@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeCityAI - Traffic Violation Detection Console</title>
+    <meta name="description" content="Automated real-time traffic safety compliance monitoring dashboard using YOLOv5. Detects helmet compliance, seatbelts, and license plates.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="glow-container">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="badge-live">LIVE</span>
+                <h1 class="brand-title">SafeCity<span>AI</span></h1>
+                <p class="brand-subtitle">Autonomous Traffic Compliance Dashboard</p>
+            </div>
+            <div class="engine-status" id="engineStatusCard">
+                <div class="status-dot pulses" id="statusDot"></div>
+                <span class="status-text" id="statusText">Checking YOLOv5 Engine...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <!-- Stats Deck -->
+        <section class="stats-deck" aria-label="Key Performance Indicators">
+            <div class="stat-card">
+                <span class="stat-label">Model Accuracy (mAP@0.5)</span>
+                <span class="stat-value text-cyan">89.4%</span>
+                <div class="stat-progress-bar"><div class="progress" style="width: 89.4%"></div></div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Precision Rate</span>
+                <span class="stat-value text-emerald">91.2%</span>
+                <div class="stat-progress-bar"><div class="progress bg-emerald" style="width: 91.2%"></div></div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Violations Flagged today</span>
+                <span class="stat-value text-red" id="totalViolationsCounter">1,482</span>
+                <span class="stat-sub">Across 4 camera sectors</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Seatbelt Compliance</span>
+                <span class="stat-value text-amber" id="seatbeltComplianceVal">94.8%</span>
+                <div class="stat-progress-bar"><div class="progress bg-amber" style="width: 94.8%"></div></div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">System Latency</span>
+                <span class="stat-value text-cyan">12ms</span>
+                <span class="stat-sub">Real-time edge processing</span>
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid -->
+        <div class="workspace-grid">
+            
+            <!-- Left Workspace: Upload & Detection Visualizer -->
+            <section class="workspace-card" id="analyzerSection">
+                <div class="card-header">
+                    <h2>Traffic Scene Image Analyzer</h2>
+                    <p>Upload a street snapshot to detect helmet violations and extract plates.</p>
+                </div>
+                
+                <!-- Upload Drop Zone -->
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <p class="drop-text">Drag & drop image here or <span>browse files</span></p>
+                        <p class="drop-subtext">Supports PNG, JPG, JPEG (Max 10MB)</p>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" class="file-hidden">
+                </div>
+
+                <!-- Detection Viewer (Hidden initially) -->
+                <div class="detection-viewer hidden" id="detectionViewer">
+                    <div class="viewer-container">
+                        <img id="sourceImage" alt="Street scene for traffic detection analysis">
+                        <canvas id="detectionCanvas"></canvas>
+                    </div>
+                    <div class="viewer-actions">
+                        <button class="btn btn-secondary" id="resetBtn">Upload Another Image</button>
+                    </div>
+                </div>
+
+                <!-- Detection Results Table -->
+                <div class="results-container hidden" id="resultsTableContainer">
+                    <h3>Detection Report</h3>
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Target Class</th>
+                                <th>Confidence</th>
+                                <th>Bounding Box [x, y, w, h]</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right Workspace: CCTV Video Feed Simulator & API Inspector -->
+            <div class="sidebar-column">
+                
+                <!-- CCTV Camera Feed Card -->
+                <section class="workspace-card" id="cctvSection">
+                    <div class="card-header">
+                        <div class="cctv-header-meta">
+                            <h2>CCTV-04: Intersection Live Feed</h2>
+                            <span class="live-dot-indicator"></span>
+                        </div>
+                        <p>Simulating live YOLOv5 inference stream</p>
+                    </div>
+                    
+                    <div class="cctv-monitor-wrapper">
+                        <!-- Canvas drawing a mock moving vehicle and motorcyclist with detections -->
+                        <canvas id="cctvSimCanvas" width="480" height="270"></canvas>
+                        <div class="cctv-timestamp" id="cctvTime">17/06/2026 22:05:06</div>
+                        <div class="cctv-overlay-text">CAM-04 CROSSROADS ROADWAY</div>
+                        <div class="cctv-alert-bar hidden" id="cctvAlert">
+                            <span>ALERT: NO_HELMET VIOLATION DETECTED</span>
+                        </div>
+                    </div>
+
+                    <div class="cctv-controls">
+                        <button class="btn btn-primary btn-sm" id="cctvPlayBtn">Pause Feed</button>
+                        <span class="cctv-stats">Processing at 30 FPS</span>
+                    </div>
+                </section>
+
+                <!-- API Inspector Card -->
+                <section class="workspace-card" id="apiInspectorSection">
+                    <div class="card-header">
+                        <h2>API JSON Response Inspector</h2>
+                        <p>Real-time payload returned from POST /api/detect</p>
+                    </div>
+                    <div class="json-inspector">
+                        <pre><code id="jsonResponse">{"status": "waiting_for_upload", "message": "Upload an image to trigger /api/detect request"}</code></pre>
+                    </div>
+                </section>
+                
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 SafeCityAI Inc. All rights reserved. Powered by YOLOv5 & PyTorch fine-tuning.</p>
+            <p>Computer Vision Engineering Deliverables (Phase 4 Deploy)</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

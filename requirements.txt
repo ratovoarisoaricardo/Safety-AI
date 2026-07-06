@@ -1,0 +1,15 @@
+# SafeCityAI YOLOv5 Project Dependencies
+
+# Flask server and client test
+Flask>=2.2.0
+requests>=2.28.0
+
+# Image & Video processing
+Pillow>=9.0.0
+opencv-python>=4.6.0
+numpy>=1.22.0
+
+# Deep learning inference engine (Optional for simulation, required for local YOLOv5)
+# Note: Install appropriate PyTorch distribution matching your CUDA version (see pytorch.org)
+# torch>=1.12.0
+# torchvision>=0.13.0

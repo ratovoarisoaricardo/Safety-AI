@@ -1,0 +1,15 @@
+# SafeCityAI YOLOv5 Dataset Configuration File
+
+path: ./dataset  # dataset root dir (relative or absolute)
+train: images/train  # train images (relative to path)
+val: images/val      # val images (relative to path)
+
+# Classes
+nc: 5  # number of classes
+names:
+  0: Helmet
+  1: No_Helmet
+  2: License_Plate
+  3: Seatbelt
+  4: No_Seatbelt
+

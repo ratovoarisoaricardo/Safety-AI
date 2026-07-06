@@ -1,0 +1,6 @@
+path: ../dataset  # Path to dataset root folder
+train: images/train  # Relative path to training images
+val: images/val      # Relative path to validation images
+
+nc: 3
+names: ['Helmet', 'No_Helmet', 'License_Plate']
