@@ -1,3 +1,10 @@
+# ==============================================================================
+# SafeCityAI - Traffic Violation Detection Console
+# Copyright (c) 2026. All rights reserved.
+# Submitted as a Minor Project for Computer Vision Engineering.
+# Developer: ratovoarisoaricardo
+# ==============================================================================
+
 import os
 import sys
 
