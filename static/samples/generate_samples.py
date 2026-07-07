@@ -7,31 +7,29 @@ def generate_samples():
     
     brain_dir = r"C:\Users\ABCD\.gemini\antigravity-ide\brain\c3a628c0-fcad-435e-81b4-aa4b369327ea"
     
-    # List of uploaded user files to copy
+    # List of 6 real traffic files (excluding the dashboard screenshot)
     uploaded_files = [
-        "media__1783426939076.png",
-        "media__1783427075665.png",
-        "media__1783427256585.png",
-        "media__1783427335917.png",
-        "media__1783427352169.png",
-        "media__1783427368847.png",
-        "media__1783427409106.png"
+        "media__1783427075665.png", # 1: girl rider
+        "media__1783427256585.png", # 2: motorcycle KTM road
+        "media__1783427335917.png", # 3: criminology rider
+        "media__1783427352169.png", # 4: double rider front
+        "media__1783427368847.png", # 5: double rider front lane
+        "media__1783427409106.png"  # 6: scooter rider front intersection
     ]
     
     # Check if we are running on the developer's machine with access to the brain folder
     if os.path.exists(brain_dir):
         print("[INFO] Developer environment detected. Copying real user-uploaded traffic images...")
         
-        # Clean any old JPEG samples
+        # Clean any old JPEG/PNG samples to keep it perfectly clean
         for file in os.listdir(base_dir):
-            if file.endswith('.jpg') or file.endswith('.png'):
-                if file != "generate_samples.py" and not file.startswith("sample_"):
-                    try:
-                        os.remove(os.path.join(base_dir, file))
-                    except Exception:
-                        pass
+            if (file.endswith('.jpg') or file.endswith('.png')) and file != "generate_samples.py":
+                try:
+                    os.remove(os.path.join(base_dir, file))
+                except Exception:
+                    pass
         
-        # Copy the 7 PNG files
+        # Copy the 6 PNG files
         copied_count = 0
         for idx, fname in enumerate(uploaded_files, 1):
             src_path = os.path.join(brain_dir, fname)
@@ -44,7 +42,6 @@ def generate_samples():
     else:
         # Running on examiner/reviewer environment: images should already be packaged
         print("[INFO] Reviewer environment detected. Gallery images should already be present.")
-        # Check if they exist, if not, print a message
         existing = [f for f in os.listdir(base_dir) if f.startswith("sample_") and f.endswith(".png")]
         print(f"[INFO] Found {len(existing)} gallery images ready on disk.")
 
