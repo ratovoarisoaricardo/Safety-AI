@@ -661,9 +661,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function initializeGallery() {
         if (!galleryGrid) return;
-        for (let i = 1; i <= 30; i++) {
+        for (let i = 1; i <= 7; i++) {
             const numStr = String(i).padStart(2, '0');
-            const filename = `sample_${numStr}.jpg`;
+            const filename = `sample_${numStr}.png`;
             const url = `/static/samples/${filename}`;
             
             const item = document.createElement('div');
