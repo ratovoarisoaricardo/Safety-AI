@@ -17,6 +17,11 @@ MODEL_PATH = 'best.pt'
 
 try:
     import torch
+    import pathlib
+    # Resolve Windows PosixPath instantiation error
+    if os.name == 'nt':
+        pathlib.PosixPath = pathlib.WindowsPath
+        
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if os.path.exists(MODEL_PATH):
         print(f" [INFO] Custom weights found. Loading Custom YOLOv5 from '{MODEL_PATH}'...")
@@ -31,8 +36,16 @@ def create_synthetic_traffic_video(filename, width=640, height=480, duration_sec
     """Generates a synthetic traffic video frame-by-frame for testing."""
     print(f" [INFO] Generating synthetic traffic clip: {filename} ({duration_sec}s, {fps}fps)...")
     
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
+    # Try using H.264 (avc1) first for web browser playback compatibility
+    try:
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
+        if not out.isOpened():
+            raise Exception("avc1 codec failed to open")
+    except Exception:
+        print(" [WARNING] avc1 codec not available. Falling back to mp4v...")
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
     
     total_frames = duration_sec * fps
     
@@ -125,8 +138,16 @@ def process_video(input_file, output_file):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
+    # Try using H.264 (avc1) first for web browser playback compatibility
+    try:
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
+        if not out.isOpened():
+            raise Exception("avc1 codec failed to open")
+    except Exception:
+        print(" [WARNING] avc1 codec not available. Falling back to mp4v...")
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
     
     print(f" [INFO] Processing {total_frames} frames from {input_file}...")
     print(f" [INFO] Output will save to {output_file}")

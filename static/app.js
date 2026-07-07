@@ -339,32 +339,65 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCctvStream() {
         if (!isCctvRunning) return;
         
-        // Clear canvas
-        cctvCtx.fillStyle = '#1b1d28';
+        // Clear canvas with dark futuristic feed color
+        cctvCtx.fillStyle = '#0f111a';
         cctvCtx.fillRect(0, 0, 480, 270);
         
+        // Draw moving digital grid background (sci-fi surveillance theme)
+        cctvCtx.strokeStyle = 'rgba(0, 240, 255, 0.05)';
+        cctvCtx.lineWidth = 1;
+        for (let x = 0; x < 480; x += 40) {
+            cctvCtx.beginPath();
+            cctvCtx.moveTo(x, 0);
+            cctvCtx.lineTo(x, 270);
+            cctvCtx.stroke();
+        }
+        for (let y = 0; y < 270; y += 30) {
+            cctvCtx.beginPath();
+            cctvCtx.moveTo(0, y);
+            cctvCtx.lineTo(480, y);
+            cctvCtx.stroke();
+        }
+
         // Draw roadway lane perspective
-        cctvCtx.fillStyle = '#2d303f';
+        cctvCtx.fillStyle = '#1e2130';
         cctvCtx.beginPath();
-        cctvCtx.moveTo(80, 270);
-        cctvCtx.lineTo(200, 80);
-        cctvCtx.lineTo(260, 80);
+        cctvCtx.moveTo(60, 270);
+        cctvCtx.lineTo(190, 80);
+        cctvCtx.lineTo(250, 80);
         cctvCtx.lineTo(380, 270);
         cctvCtx.closePath();
         cctvCtx.fill();
         
-        // Center lane white dashes
-        cctvCtx.strokeStyle = 'white';
-        cctvCtx.lineWidth = 3;
-        cctvCtx.setLineDash([15, 15]);
+        // Draw green side lanes (compliance boundaries)
+        cctvCtx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+        cctvCtx.lineWidth = 2;
         cctvCtx.beginPath();
-        cctvCtx.moveTo(225, 80);
-        cctvCtx.lineTo(210, 270);
+        cctvCtx.moveTo(60, 270);
+        cctvCtx.lineTo(190, 80);
+        cctvCtx.moveTo(380, 270);
+        cctvCtx.lineTo(250, 80);
         cctvCtx.stroke();
-        cctvCtx.setLineDash([]); // Reset
-        
+
+        // Moving center dashes (Perspective Correct)
+        const scrollSpeed = 4;
+        const dashOffset = (frameCount * scrollSpeed) % 40;
+        cctvCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        cctvCtx.lineWidth = 3;
+        cctvCtx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const currentY = 80 + i * 25 + dashOffset;
+            if (currentY > 270) continue;
+            const progress = (currentY - 80) / 190; // 0 to 1
+            const x = 220 + progress * 5;
+            const dashLength = 3 + progress * 18;
+            cctvCtx.moveTo(x, currentY);
+            cctvCtx.lineTo(x, currentY + dashLength);
+        }
+        cctvCtx.stroke();
+
         // Move Car down the lane (coming closer, scaling up)
-        carX += 0.8;
+        carX += 0.85;
         if (carX > 320) {
             carX = 140;
             hasSeatbelt = !hasSeatbelt; // Alternate seatbelt compliance status
@@ -376,20 +409,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const carY = 90 + carProgress * 140;
         const carScreenX = 260 + carProgress * 60;
         
-        // Draw Car Body
-        cctvCtx.fillStyle = '#3b82f6';
+        // Draw Car Shadow
+        cctvCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        cctvCtx.beginPath();
+        cctvCtx.ellipse(carScreenX, carY + carSizeH - 2, carSizeW * 0.5, 4, 0, 0, Math.PI * 2);
+        cctvCtx.fill();
+
+        // Draw Car Body (sleeker look with gradient)
+        const carGrad = cctvCtx.createLinearGradient(carScreenX - carSizeW/2, carY, carScreenX + carSizeW/2, carY + carSizeH);
+        carGrad.addColorStop(0, '#3b82f6');
+        carGrad.addColorStop(1, '#1d4ed8');
+        cctvCtx.fillStyle = carGrad;
         cctvCtx.fillRect(carScreenX - carSizeW/2, carY, carSizeW, carSizeH);
         
         // Draw Car Windows
-        cctvCtx.fillStyle = '#93c5fd';
-        cctvCtx.fillRect(carScreenX - carSizeW/2 + 5, carY + 3, carSizeW - 10, carSizeH/3);
+        cctvCtx.fillStyle = 'rgba(147, 197, 253, 0.85)';
+        cctvCtx.fillRect(carScreenX - carSizeW/2 + 6, carY + 3, carSizeW - 12, carSizeH/3.5);
+
+        // Draw Car Wheels (Side profile / perspective circles)
+        cctvCtx.fillStyle = '#0f172a';
+        cctvCtx.fillRect(carScreenX - carSizeW/2 + 2, carY + carSizeH - 4, carSizeW/5, 4);
+        cctvCtx.fillRect(carScreenX + carSizeW/2 - 2 - carSizeW/5, carY + carSizeH - 4, carSizeW/5, 4);
 
         // Draw Driver Silhouette in Window
         const driverX = carScreenX - carSizeW/6;
         const driverY = carY + carSizeH/4;
         const driverRadius = carSizeH/8;
         
-        cctvCtx.fillStyle = '#1e293b';
+        cctvCtx.fillStyle = '#0f172a';
         cctvCtx.beginPath();
         cctvCtx.arc(driverX, driverY, driverRadius, 0, Math.PI * 2);
         cctvCtx.fill();
@@ -401,46 +448,53 @@ document.addEventListener('DOMContentLoaded', () => {
             cctvCtx.lineWidth = 1.5;
             cctvCtx.beginPath();
             cctvCtx.moveTo(driverX - driverRadius, driverY - 2);
-            cctvCtx.lineTo(driverX + driverRadius, driverY + driverRadius * 2);
+            cctvCtx.lineTo(driverX + driverRadius, driverY + driverRadius * 1.8);
             cctvCtx.stroke();
             
-            // Green Box
+            // Green HUD target brackets
             cctvCtx.strokeStyle = '#10b981';
-            cctvCtx.lineWidth = 1.2;
-            cctvCtx.strokeRect(driverX - driverRadius - 2, driverY - driverRadius - 2, driverRadius * 2 + 4, driverRadius * 2.5 + 4);
+            cctvCtx.lineWidth = 1.5;
+            const bx = driverX - driverRadius - 3;
+            const by = driverY - driverRadius - 3;
+            const bw = driverRadius * 2 + 6;
+            const bh = driverRadius * 2.5 + 6;
+            drawHUDBrackets(bx, by, bw, bh, '#10b981');
+            
             cctvCtx.fillStyle = '#10b981';
-            cctvCtx.font = '5px monospace';
-            cctvCtx.fillText("Seatbelt 92%", driverX - driverRadius - 2, driverY - driverRadius - 4);
+            cctvCtx.font = '6px "Fira Code", monospace';
+            cctvCtx.fillText("Seatbelt:OK (92%)", bx, by - 4);
         } else {
-            // Red box (Violation)
+            // Red HUD target brackets (Violation)
             cctvCtx.strokeStyle = '#ef4444';
-            cctvCtx.lineWidth = 1.2;
-            cctvCtx.strokeRect(driverX - driverRadius - 2, driverY - driverRadius - 2, driverRadius * 2 + 4, driverRadius * 2.5 + 4);
+            cctvCtx.lineWidth = 1.5;
+            const bx = driverX - driverRadius - 3;
+            const by = driverY - driverRadius - 3;
+            const bw = driverRadius * 2 + 6;
+            const bh = driverRadius * 2.5 + 6;
+            drawHUDBrackets(bx, by, bw, bh, '#ef4444');
+            
             cctvCtx.fillStyle = '#ef4444';
-            cctvCtx.font = '5px monospace';
-            cctvCtx.fillText("No_Seatbelt 87%", driverX - driverRadius - 2, driverY - driverRadius - 4);
+            cctvCtx.font = '6px "Fira Code", monospace';
+            cctvCtx.fillText("No_Seatbelt! (87%)", bx, by - 4);
         }
         
-        // Draw License Plate (Green/Blue)
+        // Draw License Plate (White rect)
         const plateW = 12 + carProgress * 15;
         const plateH = 5 + carProgress * 5;
         const plateX = carScreenX - plateW/2;
         const plateY = carY + carSizeH - plateH - 2;
         
-        cctvCtx.fillStyle = 'white';
+        cctvCtx.fillStyle = '#f8fafc';
         cctvCtx.fillRect(plateX, plateY, plateW, plateH);
         
-        // Bounding box for plate (Cyan)
-        cctvCtx.strokeStyle = '#00f0ff';
-        cctvCtx.lineWidth = 1.5;
-        cctvCtx.strokeRect(plateX - 2, plateY - 2, plateW + 4, plateH + 4);
-        
+        // Bounding box for plate (Cyan HUD brackets)
+        drawHUDBrackets(plateX - 2, plateY - 2, plateW + 4, plateH + 4, '#00f0ff');
         cctvCtx.fillStyle = '#00f0ff';
-        cctvCtx.font = '6px monospace';
-        cctvCtx.fillText("Plate 96%", plateX - 2, plateY - 5);
+        cctvCtx.font = '6px "Fira Code", monospace';
+        cctvCtx.fillText("Plate:SF-96-AI", plateX - 2, plateY - 5);
         
         // Move Motorbike Rider
-        riderX += 1.5;
+        riderX += 1.6;
         if (riderX > 520) {
             riderX = -40;
             hasHelmet = !hasHelmet; // Alternate compliance status
@@ -452,12 +506,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const rW = 20 * riderScale;
         const rH = 40 * riderScale;
         
+        // Draw Motorcyclist Shadow
+        cctvCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        cctvCtx.beginPath();
+        cctvCtx.ellipse(riderX, riderY + 2, rW * 0.7, 3 * riderScale, 0, 0, Math.PI * 2);
+        cctvCtx.fill();
+
         // Draw Motorcyclist body
         cctvCtx.fillStyle = '#ec4899';
         cctvCtx.fillRect(riderX - rW/2, riderY - rH, rW, rH);
         
         // Draw Wheels
-        cctvCtx.fillStyle = '#000000';
+        cctvCtx.fillStyle = '#090d16';
         cctvCtx.beginPath();
         cctvCtx.arc(riderX - rW/3, riderY, 6*riderScale, 0, Math.PI * 2);
         cctvCtx.arc(riderX + rW/3, riderY, 6*riderScale, 0, Math.PI * 2);
@@ -475,12 +535,16 @@ document.addEventListener('DOMContentLoaded', () => {
             cctvCtx.arc(headX, headY, headRadius + 1, 0, Math.PI * 2);
             cctvCtx.fill();
             
-            // Green Box
-            cctvCtx.strokeStyle = '#10b981';
-            cctvCtx.lineWidth = 1.5;
-            cctvCtx.strokeRect(headX - headRadius - 2, headY - headRadius - 2, headRadius*2 + 4, headRadius*2 + 4);
-            cctvCtx.font = '6px monospace';
-            cctvCtx.fillText("Helmet 91%", headX - headRadius - 2, headY - headRadius - 5);
+            // Green HUD brackets
+            const bx = headX - headRadius - 2;
+            const by = headY - headRadius - 2;
+            const bw = headRadius * 2 + 4;
+            const bh = headRadius * 2 + 4;
+            drawHUDBrackets(bx, by, bw, bh, '#10b981');
+            
+            cctvCtx.fillStyle = '#10b981';
+            cctvCtx.font = '6px "Fira Code", monospace';
+            cctvCtx.fillText("Helmet:OK (91%)", bx, by - 5);
             cctvAlert.classList.add('hidden');
         } else {
             // Draw Face (Skin colored circle)
@@ -489,13 +553,16 @@ document.addEventListener('DOMContentLoaded', () => {
             cctvCtx.arc(headX, headY, headRadius, 0, Math.PI * 2);
             cctvCtx.fill();
             
-            // Red Box (Violation)
-            cctvCtx.strokeStyle = '#ef4444';
-            cctvCtx.lineWidth = 1.5;
-            cctvCtx.strokeRect(headX - headRadius - 2, headY - headRadius - 2, headRadius*2 + 4, headRadius*2 + 4);
+            // Red HUD brackets (Violation)
+            const bx = headX - headRadius - 2;
+            const by = headY - headRadius - 2;
+            const bw = headRadius * 2 + 4;
+            const bh = headRadius * 2 + 4;
+            drawHUDBrackets(bx, by, bw, bh, '#ef4444');
+            
             cctvCtx.fillStyle = '#ef4444';
-            cctvCtx.font = '6px monospace';
-            cctvCtx.fillText("No_Helmet 88%", headX - headRadius - 2, headY - headRadius - 5);
+            cctvCtx.font = '6px "Fira Code", monospace';
+            cctvCtx.fillText("No_Helmet! (88%)", bx, by - 5);
             
             // Only trigger alert when rider is in center frame
             if (riderX > 150 && riderX < 350) {
@@ -507,10 +574,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Trigger seatbelt alert if driver has no seatbelt and car is close
-        if (!hasSeatbelt && carX > 200 && carX < 280) {
+        const isCarSeatbeltAlert = (!hasSeatbelt && carX > 200 && carX < 280);
+        if (isCarSeatbeltAlert) {
             cctvAlert.classList.remove('hidden');
             cctvAlert.innerHTML = `<span>ALERT: NO_SEATBELT VIOLATION DETECTED</span>`;
         }
+
+        // Pulse warning border on the entire canvas if any alert is active
+        const isAlertActive = (!cctvAlert.classList.contains('hidden'));
+        if (isAlertActive) {
+            cctvCtx.strokeStyle = `rgba(239, 68, 68, ${0.3 + Math.sin(frameCount * 0.15) * 0.2})`;
+            cctvCtx.lineWidth = 4;
+            cctvCtx.strokeRect(0, 0, 480, 270);
+        }
+
+        // Draw HUD Camera Overlays (crosshair, guidelines)
+        cctvCtx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+        cctvCtx.lineWidth = 1;
+        // Central Crosshair
+        cctvCtx.beginPath();
+        cctvCtx.moveTo(240, 125); cctvCtx.lineTo(240, 145);
+        cctvCtx.moveTo(230, 135); cctvCtx.lineTo(250, 135);
+        cctvCtx.stroke();
+        
+        // Outer corners brackets
+        drawHUDBrackets(10, 10, 460, 250, 'rgba(0, 240, 255, 0.4)', 15);
 
         // Fluctuate Seatbelt Compliance Rate slightly for live effect
         if (frameCount % 120 === 0) {
@@ -529,6 +617,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         frameCount++;
         requestAnimationFrame(updateCctvStream);
+    }
+
+    // Helper to draw clean Sci-Fi HUD brackets instead of simple boxes
+    function drawHUDBrackets(x, y, w, h, color, size = 4) {
+        cctvCtx.strokeStyle = color;
+        cctvCtx.lineWidth = 1.5;
+        // Top Left
+        cctvCtx.beginPath();
+        cctvCtx.moveTo(x + size, y); cctvCtx.lineTo(x, y); cctvCtx.lineTo(x, y + size);
+        // Top Right
+        cctvCtx.moveTo(x + w - size, y); cctvCtx.lineTo(x + w, y); cctvCtx.lineTo(x + w, y + size);
+        // Bottom Left
+        cctvCtx.moveTo(x + size, y + h); cctvCtx.lineTo(x, y + h); cctvCtx.lineTo(x, y + h - size);
+        // Bottom Right
+        cctvCtx.moveTo(x + w - size, y + h); cctvCtx.lineTo(x + w, y + h); cctvCtx.lineTo(x + w, y + h - size);
+        cctvCtx.stroke();
     }
     
     // Start simulation loop

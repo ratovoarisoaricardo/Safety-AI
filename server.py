@@ -14,6 +14,11 @@ MODEL_PATH = 'best.pt'
 # Try loading PyTorch and YOLOv5
 try:
     import torch
+    import pathlib
+    # Resolve Windows PosixPath instantiation error
+    if os.name == 'nt':
+        pathlib.PosixPath = pathlib.WindowsPath
+        
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     if os.path.exists(MODEL_PATH):
