@@ -157,3 +157,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# SafeCityAI dynamic test gallery assets
+static/samples/*.jpg

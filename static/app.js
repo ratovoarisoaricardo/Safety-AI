@@ -102,6 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
         detectionViewer.classList.add('hidden');
         resultsTableContainer.classList.add('hidden');
         dropZone.classList.remove('hidden');
+        if (document.getElementById('gallerySection')) {
+            document.getElementById('gallerySection').classList.remove('hidden');
+        }
         fileInput.value = '';
         jsonResponse.textContent = JSON.stringify({
             "status": "waiting_for_upload",
@@ -122,8 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Hide drop zone and show placeholder image to compute coordinates
+        // Hide drop zone and gallery, show placeholder image to compute coordinates
         dropZone.classList.add('hidden');
+        if (document.getElementById('gallerySection')) {
+            document.getElementById('gallerySection').classList.add('hidden');
+        }
         detectionViewer.classList.remove('hidden');
         
         // Show loading state
@@ -646,4 +652,51 @@ document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(updateCctvStream);
         }
     });
+
+    // ----------------------------------------------------
+    // 6. Quick Test Gallery Initialization
+    // ----------------------------------------------------
+    const galleryGrid = document.getElementById('galleryGrid');
+    const gallerySection = document.getElementById('gallerySection');
+    
+    function initializeGallery() {
+        if (!galleryGrid) return;
+        for (let i = 1; i <= 30; i++) {
+            const numStr = String(i).padStart(2, '0');
+            const filename = `sample_${numStr}.jpg`;
+            const url = `/static/samples/${filename}`;
+            
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${url}" alt="Scenario ${numStr}">
+                <div class="gallery-item-label">Scenario ${numStr}</div>
+            `;
+            item.addEventListener('click', () => {
+                selectSampleImage(url, filename);
+            });
+            galleryGrid.appendChild(item);
+        }
+    }
+    
+    function selectSampleImage(url, filename) {
+        // Show loading state in inspector
+        jsonResponse.textContent = `Loading ${filename}...\nPreparing test payload...`;
+        
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error("Sample file not found");
+                return res.blob();
+            })
+            .then(blob => {
+                const file = new File([blob], filename, { type: "image/jpeg" });
+                handleUploadedFile(file);
+            })
+            .catch(err => {
+                console.error("Error loading sample image:", err);
+                alert("Failed to load sample image. Please ensure the server has run 'generate_samples.py' first.");
+            });
+    }
+    
+    initializeGallery();
 });
