@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update Time display dynamically
         const now = new Date();
-        const timeStr = now.toLocaleDateString('fr-FR') + ' ' + now.toLocaleTimeString('fr-FR');
+        const timeStr = now.toLocaleDateString('en-US') + ' ' + now.toLocaleTimeString('en-US');
         cctvTime.textContent = timeStr;
         
         frameCount++;

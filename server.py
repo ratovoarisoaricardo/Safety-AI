@@ -38,6 +38,14 @@ def index():
     """Renders the SafeCityAI Dashboard Home Page."""
     return render_template('index.html')
 
+@app.route('/video/demo')
+def serve_demo_video():
+    """Serves the generated demonstration video file."""
+    try:
+        return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'output_violation_demo.mp4', as_attachment=False)
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Video file not found or cannot be served: {e}"}), 404
+
 @app.route('/api/detect', methods=['POST'])
 def detect():
     """

@@ -27,7 +27,7 @@ try:
 except Exception as e:
     print(f" [INFO] PyTorch not initialized: {e}. Running in simulation mode.")
 
-def create_synthetic_traffic_video(filename, width=640, height=480, duration_sec=10, fps=30):
+def create_synthetic_traffic_video(filename, width=640, height=480, duration_sec=30, fps=30):
     """Generates a synthetic traffic video frame-by-frame for testing."""
     print(f" [INFO] Generating synthetic traffic clip: {filename} ({duration_sec}s, {fps}fps)...")
     
@@ -101,8 +101,19 @@ def create_synthetic_traffic_video(filename, width=640, height=480, duration_sec
     print(" [SUCCESS] Synthetic video written.")
 
 def process_video(input_file, output_file):
-    if not os.path.exists(input_file):
-        create_synthetic_traffic_video(input_file)
+    # Force delete existing files to ensure we regenerate the 30-second video
+    if os.path.exists(input_file):
+        try:
+            os.remove(input_file)
+        except Exception:
+            pass
+    if os.path.exists(output_file):
+        try:
+            os.remove(output_file)
+        except Exception:
+            pass
+            
+    create_synthetic_traffic_video(input_file)
         
     cap = cv2.VideoCapture(input_file)
     if not cap.isOpened():
