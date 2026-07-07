@@ -34,7 +34,7 @@ python -m pip install -r requirements.txt
 echo [INFO] Generating demo video (30 seconds)...
 python demo_video.py
 
-:: Generate the 30 gallery test images
+:: Generate the 6 gallery test images
 echo [INFO] Generating quick test gallery images...
 python static/samples/generate_samples.py
 

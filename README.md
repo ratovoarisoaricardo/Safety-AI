@@ -12,7 +12,7 @@ The project is designed to run out of the box. Follow these steps to set up the 
 
 ### Method 1: Using the Automated Startup Script (Windows)
 1. Navigate to the root directory of the project.
-2. Double-click the **`lancer_safecity.bat`** file.
+2. Double-click the **`run_safecity.bat`** file.
 3. The script will automatically:
    * Verify Python installation.
    * Upgrade `pip` and install all required libraries from `requirements.txt`.
