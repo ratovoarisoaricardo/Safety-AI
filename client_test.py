@@ -24,7 +24,9 @@ def test_api():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Path to sample image
-    img_path = os.path.join(base_dir, 'dataset', 'images', 'train', 'image1.jpg')
+    img_path = os.path.join(base_dir, 'datasets', 'dataset_image', 'images', 'train', 'image1.jpg')
+    if not os.path.exists(img_path):
+        img_path = os.path.join(base_dir, 'dataset', 'images', 'train', 'image1.jpg')
     
     # Check if mock images exist. If not, generate them.
     if not os.path.exists(img_path):
