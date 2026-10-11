@@ -1,0 +1,16 @@
+# ==============================================================================
+# SafeCityAI - CCTV Video Traffic Dataset Configuration
+# Base de données séparée dédiée aux flux vidéos et caméras de circulation
+# ==============================================================================
+
+path: ./datasets/dataset_cctv  # Répertoire racine de la BDD CCTV
+train: images/train           # Images d'entraînement extraites des flux CCTV
+val: images/val               # Images de validation
+
+# Classes spécifiques au trafic CCTV
+nc: 4
+names:
+  0: number plate
+  1: rider
+  2: with helmet
+  3: without helmet

@@ -13,3 +13,6 @@ numpy>=1.22.0
 # Note: Install appropriate PyTorch distribution matching your CUDA version (see pytorch.org)
 # torch>=1.12.0
 # torchvision>=0.13.0
+
+# Automatic License Plate Recognition (ALPR OCR)
+easyocr>=1.7.0

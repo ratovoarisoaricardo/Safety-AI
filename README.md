@@ -1,4 +1,4 @@
-﻿# SafeCityAI 🚗🚦
+# SafeCityAI 🚗🚦
 
 <div align="center">
   <img src="static/samples/sample_car.jpg" alt="SafeCityAI Preview" width="600"/>
@@ -14,13 +14,17 @@
 ## 🇬🇧 English
 
 ### 📖 About the Project
-An automated, real-time traffic safety compliance monitoring dashboard powered by a custom YOLOv5 object detection model.
+SafeCityAI is an autonomous, real-time traffic safety compliance monitoring and enforcement platform powered by a **Dual YOLOv5 Neural Architecture** and **ALPR OCR**. It provides distinct inspection modes for high-resolution photo scans and 30 FPS live CCTV video surveillance.
 
 ### ✨ Key Features
-- 🚗 Real-time traffic monitoring
-- 🚦 YOLOv5 custom object detection
-- 🎥 Live camera feed processing
-- 📊 Web-based analytics dashboard
+- 🌐 **Fully Bilingual UI (FR 🇫🇷 / EN 🇬🇧)**: Instantaneous dynamic language switcher with persistent user preference.
+- 🧠 **Dual Neural Engine Architecture**:
+  - `best_image.pt`: High-precision neural inference for static road camera captures.
+  - `best_cctv.pt`: Real-time optimized detector filtered for urban motorcycle traffic.
+- 🔍 **Visual Evidence Crops**: Automated high-precision zoom extractions (Helmet/Head, Rider, License Plate).
+- 🏷️ **ALPR & OCR Reading**: Real-time license plate detection and optical character recognition with EasyOCR.
+- 📋 **Enforcement Officer Reports**: Automated generation of legal violation dossiers (Art. R431-1).
+- 🎥 **Dedicated CCTV Mode**: Live MJPEG video stream (30 FPS), interactive 2D simulation, and 1-click frame capture for forensic analysis.
 
 ### 💻 Getting Started
 To get a local copy up and running, execute the appropriate command:
@@ -48,13 +52,17 @@ python server.py
 ## 🇫🇷 Français
 
 ### 📖 À propos du projet
-Un tableau de bord automatisé en temps réel pour la surveillance de la sécurité routière, alimenté par un modèle de détection d'objets YOLOv5 personnalisé.
+SafeCityAI est une plateforme autonome de surveillance et de verbalisation de la sécurité routière en temps réel, propulsée par une **architecture neuronale double YOLOv5** et un module **ALPR OCR**. Elle propose des modes distincts pour l'analyse photo haute résolution et la vidéosurveillance CCTV à 30 FPS.
 
 ### ✨ Fonctionnalités clés
-- 🚗 Surveillance du trafic en temps réel
-- 🚦 Détection d'objets personnalisée avec YOLOv5
-- 🎥 Traitement des flux vidéo en direct
-- 📊 Tableau de bord analytique web
+- 🌐 **Interface Entièrement Bilingue (FR 🇫🇷 / EN 🇬🇧)** : Bascule dynamique instantanée avec mémorisation des préférences.
+- 🧠 **Architecture Double-Moteur IA** :
+  - `best_image.pt` : Détecteur haute précision pour clichés radar fixes (protégé en lecture seule).
+  - `best_cctv.pt` : Modèle vidéo temps réel optimisé pour la circulation urbaine des deux-roues.
+- 🔍 **Preuves Visuelles Découpées** : Découpage automatique des zones d'intérêt (Casque/Tête, Motard, Plaque).
+- 🏷️ **Module ALPR & OCR** : Lecture optique de plaques minéralogiques en temps réel avec EasyOCR.
+- 📋 **Rapport pour Agent de Contrôle** : Synthèse légale automatique pour verbalisation (Art. R431-1).
+- 🎥 **Mode Vidéosurveillance CCTV Dédié** : Flux direct 30 FPS, simulateur 2D et capture de frame en 1 clic pour scan haute résolution.
 
 ### 🚀 Démarrage rapide
 
@@ -71,5 +79,5 @@ chmod +x start.sh && ./start.sh
 
 ---
 <div align="center">
-  <sub>Built with ❤️ by Ricardo | AI & Full-Stack Developer</sub>
+  <sub>Copyright &copy; 2026 Ratovoarisoa Mendrika Manjaka Ricardo (ratovoarisoaricardo) • All rights reserved.</sub>
 </div>

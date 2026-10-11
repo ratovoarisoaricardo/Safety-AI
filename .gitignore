@@ -160,3 +160,14 @@ Thumbs.db
 
 # SafeCityAI dynamic test gallery assets
 static/samples/*.jpg
+
+# Temporary test media & scratch data
+scratch_frames/
+*.webm
+synthetic_traffic_old.mp4
+real_helmet_traffic.mp4
+real_traffic_cars.mp4
+moto_check_frame.jpg
+saigon_frame.jpg
+real_traffic_cars_frame.jpg
+sample_traffic_frame.jpg
