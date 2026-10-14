@@ -1,8 +1,8 @@
-# 🚦 SafeCityAI — Console Autonome de Sécurité Routière & Détection d'Infractions
+# 🚦 SafeCityAI — Autonomous Road Safety & AI Traffic Enforcement Console
 
 <div align="center">
 
-  <img src="static/samples/sample_03.png" alt="SafeCityAI Preview Snapshot" width="720" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);"/>
+  <img src="static/samples/sample_03.png" alt="SafeCityAI Preview Snapshot" width="760" style="border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.45);"/>
 
   <br/><br/>
 
@@ -12,592 +12,399 @@
   [![Flask](https://img.shields.io/badge/Flask-2.2%2B-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
   [![EasyOCR](https://img.shields.io/badge/EasyOCR-ALPR-4CAF50?style=for-the-badge&logo=googlelens&logoColor=white)](https://github.com/JaidedAI/EasyOCR)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-  [![Bilingual](https://img.shields.io/badge/Language-FR%20%F0%9F%87%AB%F0%9F%87%B7%20%7C%20EN%20%F0%9F%87%AC%F0%9F%87%A7-blue?style=for-the-badge)](#-système-bilingue--bilingual-ui)
 
   <p align="center">
-    <strong>Plateforme Intelligente de Vidéosurveillance Routière, Inférence Double-Modèle YOLOv5 & Reconnaissance Optique de Plaques (ALPR).</strong>
-    <br/>
-    <em>Autonomous Road Safety & Traffic Enforcement System with Dual YOLOv5 Vision & ALPR Optical Recognition.</em>
+    <strong>Production-Grade Edge AI Platform for Autonomous Road Safety Enforcement, Dual-Engine YOLOv5 Computer Vision & Multi-Regional ALPR Optical Character Recognition.</strong>
+  </p>
+
+  <p align="center">
+    <strong>🌍 Language / Langue :</strong>
+    <b>🇬🇧 English (Default)</b> •
+    <a href="README_FR.md">🇫🇷 Lire la documentation en Français (French Version)</a>
   </p>
 
 </div>
 
 ---
 
-## 📑 Sommaire / Table of Contents
+## 📑 Table of Contents
 
-- [🇫🇷 Présentation du Projet (Français)](#-présentation-du-projet-français)
-- [🇬🇧 Project Overview (English)](#-project-overview-english)
-- [🧠 Architecture Double-Modèle & ALPR](#-architecture-double-modèle--alpr)
-- [🔄 Workflow Complet de Bout en Bout](#-workflow-complet-de-bout-en-bout--end-to-end-pipeline)
-- [📦 Séparation Architecturale des 2 Modules](#-séparation-architecturale-des-2-modules)
-  - [📸 Module 1 : Analyse Photo & Procès-Verbal](#-module-1--analyse-photo--verbalisation-légale-contrôle-cliché)
-  - [🎥 Module 2 : Vidéosurveillance CCTV 30 FPS](#-module-2--vidéosurveillance-caméra-cctv-direct-30-fps)
-  - [🌉 Passerelle Inter-Modules (Bridge Handoff)](#-passerelle-inter-modules-bridge-handoff)
-- [🗄️ Architecture & Gestion des Datasets](#-architecture--gestion-des-datasets)
-  - [1. Partitionnement Physique des Données](#1-partitionnement-physique-des-données)
-  - [2. Classes & Formats YOLOv5](#2-classes-et-formats-dannotation-yolov5)
-  - [3. Outils du Cycle de Données (Toolchain)](#3-outils-du-cycle-de-données-data-toolchain)
-- [🎓 Guide d'Entraînement : Obtenir `best.pt` via Roboflow & Google Colab](#-guide-dentraînement--comment-obtenir-bestpt-via-roboflow--google-colab)
-- [🌐 Dépôts Open Source GitHub pour Plaques d'Immatriculation](#-dépôts-open-source-github--datasets-pour-plaques-dimmatriculation)
-- [✨ Fonctionnalités Clés / Key Features](#-fonctionnalités-clés--key-features)
-- [🌐 Système Bilingue / Bilingual UI](#-système-bilingue--bilingual-ui)
-- [📁 Structure Complète du Projet](#-structure-complète-du-projet)
-- [🚀 Démarrage Rapide / Quickstart](#-démarrage-rapide--quickstart)
-- [🔌 Spécification de l'API REST](#-spécification-de-lapi-rest)
-- [🧪 Tests Automatisés & Validation](#-tests-automatisés--validation)
-- [🔮 Suggestions d'Améliorations & Roadmap](#-suggestions-daméliorations--roadmap-technique)
-- [📜 Licence & Copyright](#-licence--copyright)
-
----
-
-## 🇫🇷 Présentation du Projet (Français)
-
-**SafeCityAI** est une console de surveillance et de verbalisation automatisée conçue pour les services de sécurité routière et les municipalités intelligentes (*Smart Cities*).
-
-Le système analyse les flux de circulation urbains pour intercepter en temps réel les infractions au Code de la Route (défaut de port du casque de protection obligatoire selon l'**Article R431-1**), isoler automatiquement les preuves photographiques par recadrage haute résolution, lire les plaques d'immatriculation (ALPR OCR) et générer instantanément un procès-verbal officiel prêt à l'emploi.
-
-### Les 2 Modes Opérationnels Dédiés :
-
-1. **📸 Mode Analyse Image (Contrôle Cliché)** :
-   - Conçu pour le traitement de photos radar haute résolution ou l'audit a posteriori.
-   - Découpage dynamique de **vignettes de preuves (Crops)** : tête/casque, corps du motard et plaque zoomée.
-   - Reconnaissance optique des caractères (OCR) de la plaque et qualification légale du constat.
-   - Procès-verbal officiel généré avec actions d'export et copie en 1 clic.
-
-2. **🎥 Mode Vidéosurveillance Caméra (Direct 30 FPS)** :
-   - Traitement continu d'un flux caméra de carrefour urbain (filtré à 100% sur les deux-roues).
-   - Affichage HUD avec réticule numérique, horodatage synchronisé et bandeaux d'alerte en direct.
-   - Journal chronologique des motards interceptés avec statut de conformité et matricule.
-   - Simulateur 2D interactif et bouton de **capture de frame en 1 clic** basculant directement la scène en haute définition dans le Mode Analyse Image.
+- [🌟 Project Highlights](#-project-highlights)
+- [🧠 Dual-Model Deep Learning Architecture](#-dual-model-deep-learning-architecture)
+- [🔄 End-to-End 8-Stage Processing Pipeline](#-end-to-end-8-stage-processing-pipeline)
+- [📦 The Two Decoupled Operational Modules](#-the-two-decoupled-operational-modules)
+  - [📸 Module 1: Forensic Image Analysis & Dynamic ROI Proof Cropping](#-module-1-forensic-image-analysis--evidence-harvesting)
+  - [🎥 Module 2: 30 FPS CCTV Video Surveillance & Live Physical Webcam](#-module-2-30-fps-cctv-video-surveillance--live-physical-webcam)
+  - [🌉 Inter-Module Handoff Bridge](#-inter-module-handoff-bridge)
+- [🌍 Multi-Regional Legal Framework & ALPR Formats](#-multi-regional-legal-framework--alpr-formats)
+- [🗄️ Dataset Architecture & Partitioning](#-dataset-architecture--partitioning)
+  - [1. Physical Directory Structure](#1-physical-directory-structure)
+  - [2. YOLOv5 Annotation Formats & Classes](#2-yolov5-annotation-formats--classes)
+  - [3. CLI Data Toolchain](#3-cli-data-toolchain)
+- [🎓 Model Training Guide: How to Obtain `best.pt` with Roboflow & Google Colab](#-model-training-guide-how-to-obtain-bestpt-with-roboflow--google-colab)
+- [🌐 Open-Source License Plate Datasets & Repositories](#-open-source-license-plate-datasets--repositories)
+- [✨ Key Features](#-key-features)
+- [📁 Repository Structure](#-repository-structure)
+- [🚀 Quickstart Guide](#-quickstart-guide)
+- [🔌 REST API Specification](#-rest-api-specification)
+- [🧪 Automated Testing & Verification](#-automated-testing--verification)
+- [🔮 Production Roadmap & Engineering Enhancements](#-production-roadmap--engineering-enhancements)
+- [📜 License & Author Attribution](#-license--author-attribution)
 
 ---
 
-## 🇬🇧 Project Overview (English)
+## 🌟 Project Highlights
 
-**SafeCityAI** is an autonomous traffic enforcement and safety compliance console engineered for road safety authorities and smart city infrastructure.
+**SafeCityAI** is an autonomous smart-city traffic surveillance and enforcement system designed for law enforcement agencies, municipal transportation departments, and road safety regulators.
 
-The platform continuously inspects urban traffic to detect non-compliant motorcyclists operating without safety helmets (mandated by traffic regulations), extracts high-precision visual proof crops, executes Automatic License Plate Recognition (ALPR OCR), and compiles official legal infraction dossiers in real-time.
+The platform processes high-resolution photographic evidence and live video streams to intercept road safety violations in real time (e.g., failure to wear mandatory safety helmets on motorized two-wheelers), harvests zoomed forensic proof cutouts, performs on-premise Automatic License Plate Recognition (ALPR), and formats ready-to-issue official legal citations.
+
+### Core Distinctions:
+* **True Dual-Model Decoupling**: High-precision forensic model (`best_image.pt`, 92.4% mAP) protected by read-only failover, coupled with an asynchronous high-throughput CCTV model (`best_cctv.pt`) running at 30 FPS.
+* **Authentic Traffic Video & Live Webcam Capture**: Integrates continuous 1080p open-source surveillance footage of dense urban intersections, supports real physical PC webcams (`cv2.VideoCapture(0)`), and accommodates network RTSP/IP streams.
+* **100% On-Premise & Privacy Compliant**: Zero dependencies on paid external APIs or third-party cloud OCR services; biometric facial data and license plates are processed entirely on-device.
+* **Multi-Jurisdiction Compliance**: Out-of-the-box legal profiles for **Universal Auto-Detection**, **🇨🇭 Switzerland** (LCR/OCR Art. 3b), **🇫🇷 France** (Code de la Route Art. R431-1), and **🇮🇳 India** (Motor Vehicles Act Sec. 129).
 
 ---
 
-## 🧠 Architecture Double-Modèle & ALPR
+## 🧠 Dual-Model Deep Learning Architecture
 
-Pour garantir une précision maximale et éviter les compromis entre résolution photo et fluidité vidéo, SafeCityAI exploite une architecture neuronale découplée :
+To eliminate the classic tradeoff between high-resolution forensic accuracy and real-time streaming frame rates, SafeCityAI decouples static analysis from continuous streaming:
 
 ```
-                        Flux Entrant (Photo ou Vidéo CCTV)
-                                        │
-                ┌───────────────────────┴───────────────────────┐
-                ▼                                               ▼
-       [ Mode Photo / Upload ]                       [ Flux Caméra CCTV Direct ]
-                │                                               │
-      Modèle: best_image.pt                          Modèle: best_cctv.pt
-  (Précision mAP@0.5: 92.4% 🔒)                  (Spécialisé motos urbaines, 30 FPS)
-  [best_image_backup.pt protégé]                                │
-                │                                               │
-                └───────────────────────┬───────────────────────┘
-                                        ▼
-                        Boîtes Englobantes (Bounding Boxes)
-                          - 0: number plate
-                          - 1: rider
-                          - 2: with helmet
-                          - 3: without helmet
-                                        │
-                                        ▼
-                         Extraction de Zones d'Intérêt
-                                (Visual Crops)
-                                        │
-                                        ▼
-                          Moteur ALPR EasyOCR Local
-                        (craft_mlt_25k + english_g2)
-                                        │
-                                        ▼
-                      Dashboard Web & Procès-Verbal Officiel
+                        Incoming Media Stream (Photo or CCTV Video)
+                                             │
+                     ┌───────────────────────┴───────────────────────┐
+                     ▼                                               ▼
+          [ Static Snapshot Mode ]                       [ Live CCTV Camera Stream ]
+                     │                                               │
+           Model: best_image.pt                            Model: best_cctv.pt
+       (mAP@0.5: 92.4% Precision 🔒)                   (Tuned for 30 FPS Motion Blur)
+       [best_image_backup.pt secured]                                │
+                     │                                               │
+                     └───────────────────────┬───────────────────────┘
+                                             ▼
+                             Normalized Bounding Boxes
+                               - 0: number plate
+                               - 1: rider
+                               - 2: with helmet
+                               - 3: without helmet
+                                             │
+                                             ▼
+                             Dynamic ROI Evidence Cropping
+                                     (Visual Proofs)
+                                             │
+                                             ▼
+                               On-Premise Local ALPR Engine
+                               (EasyOCR: CRAFT + CRNN)
+                                             │
+                                             ▼
+                            Web Console & Legal Citation Dossier
 ```
 
-* **`weights/best_image.pt`** : Entraîné pour l'analyse statique haute précision sur clichés fixes. Protégé par une sauvegarde miroir `weights/best_image_backup.pt`.
-* **`weights/best_cctv.pt`** : Spécifiquement calibré pour les caméras de vidéosurveillance urbaine avec gestion du flou de mouvement et filtrage ciblé sur les motards.
-* **`alpr_ocr.py`** : Moteur ALPR exploitant les réseaux de neurones profonds CRAFT (*Character Region Awareness for Text Detection*) et CRNN (*Convolutional Recurrent Neural Network*). Les modèles tournent 100% en local sans aucune dépendance cloud payante ni fuite de données privées.
+* **`weights/best_image.pt`**: Optimized for static high-resolution analysis. Backed up by a read-only mirror (`weights/best_image_backup.pt`) that cannot be overwritten during ad-hoc fine-tuning.
+* **`weights/best_cctv.pt`**: Specifically tuned for urban surveillance angles, perspective distortion, and optical motion blur at high frame rates.
+* **`alpr_ocr.py`**: Local ALPR pipeline powered by deep CRAFT (*Character Region Awareness for Text Detection*) and CRNN (*Convolutional Recurrent Neural Network*) architectures, operating with zero external API calls.
 
 ---
 
-## 🔄 Workflow Complet de Bout en Bout / End-to-End Pipeline
+## 🔄 End-to-End 8-Stage Processing Pipeline
 
-SafeCityAI orchestre une chaîne de traitement complète en **8 étapes séquentielles**, reliant l'acquisition vidéo/photo jusqu'à la notification de verbalisation officielle :
+SafeCityAI executes an 8-stage pipeline from optical media ingestion to citation delivery:
 
 ```mermaid
 flowchart TD
-    subgraph S1["1. Acquisition des Flux"]
-        A1["Photo HD Radar / Smartphone (JPG/PNG)"]
-        A2["Flux Vidéo Carrefour CCTV (RTSP / MP4 30 FPS)"]
+    subgraph S1["1. Media Ingestion"]
+        A1["High-Res Radar / Camera Photo (JPG/PNG)"]
+        A2["Live CCTV Stream (RTSP / 1080p WebM / PC Webcam)"]
     end
 
-    subgraph S2["2. Aiguillage & Découplage"]
-        B1["Dispatcher d'Inférence"]
+    subgraph S2["2. Dispatcher & Decoupling"]
+        B1["Inference Dispatcher"]
         A1 --> B1
         A2 --> B1
-        B1 -->|"Mode Photo (Statique)"| C1["Moteur Photo (best_image.pt)"]
-        B1 -->|"Mode Caméra (Direct)"| C2["Moteur CCTV 30 FPS (best_cctv.pt)"]
+        B1 -->|"Static Snapshot Mode"| C1["Forensic Engine (best_image.pt)"]
+        B1 -->|"Live Camera Mode"| C2["30 FPS CCTV Engine (best_cctv.pt)"]
     end
 
-    subgraph S3["3. Inférence & Post-Traitement IA"]
-        C1 --> D1["Letterbox 640x640 + Forward YOLOv5"]
-        C2 --> D2["Échantillonnage 1/3 frame + YOLOv5"]
+    subgraph S3["3. YOLOv5 Neural Inference"]
+        C1 --> D1["Letterbox 640x640 + Forward Pass"]
+        C2 --> D2["1/3 Frame Subsampling + Forward Pass"]
         D1 --> E1["Non-Maximum Suppression (Torch NMS)"]
-        D2 --> E2["Filtre Ciblé Deux-Roues (Motos/Riders)"]
+        D2 --> E2["Motorcycle / Rider Class Filter"]
     end
 
-    subgraph S4["4. Analyse Contextuelle Complémentaire"]
-        E1 --> F1["Détection Faciale (Haar Cascade)"]
-        F1 --> F2["Analyse Ceinture Diagonale (Canny + Hough)"]
-        E1 --> F3["Détection morphologique Sobel (Plaques auto)"]
+    subgraph S4["4. Supplementary Vision Analysis"]
+        E1 --> F1["Facial Haar Cascade (Passenger Cabin)"]
+        F1 --> F2["Diagonal Seatbelt Gradient (Canny + Hough)"]
+        E1 --> F3["Sobel Edge Analysis (Car Plates)"]
     end
 
-    subgraph S5["5. Extraction de Preuves & ALPR"]
-        E1 --> G1["Découpage Dynamique de ROI (Preuves Crops)"]
-        G1 --> G2["Zoom Tête / Casque"]
-        G1 --> G3["Zoom Motard / Conducteur"]
-        G1 --> G4["Zoom Plaque Minéralogique"]
-        G4 --> H1["Rehaussement CLAHE + Filtre Bilatéral"]
-        H1 --> H2["EasyOCR CRAFT + CRNN Local"]
-        H2 --> H3["Normalisation Regex Matricule"]
+    subgraph S5["5. Evidence Harvesting & ALPR"]
+        E1 --> G1["Dynamic ROI Evidence Cropping"]
+        G1 --> G2["Head / Helmet Zoom Crop"]
+        G1 --> G3["Rider / Body Zoom Crop"]
+        G1 --> G4["License Plate Zoom Crop"]
+        G4 --> H1["CLAHE Contrast Boost + Bilateral Denoise"]
+        H1 --> H2["EasyOCR CRAFT + CRNN Inference"]
+        H2 --> H3["Regex Alphanumeric Normalization"]
     end
 
-    subgraph S6["6. Évaluation Juridique & Synthèse"]
-        E1 & H3 --> J1["Moteur d'Évaluation Juridique"]
-        J1 --> J2{"Conformité Art. R431-1 ?"}
-        J2 -->|"Sans Casque / Sans Ceinture"| K1["Statut: VIOLATION (Critique) - PV Généré"]
-        J2 -->|"Casque Porté Réglementaire"| K2["Statut: CONFORME - Archivage d'audit"]
-        J2 -->|"Usager Standard"| K3["Statut: OBSERVATION - Télémétrie"]
+    subgraph S6["6. Jurisdictional Legal Engine"]
+        E1 & H3 --> J1["Statutory Evaluation Engine"]
+        J1 --> J2{"Helmet / Seatbelt Verified?"}
+        J2 -->|"No Helmet / No Seatbelt"| K1["Status: VIOLATION (Critical) - Dossier Compiled"]
+        J2 -->|"Approved Helmet Worn"| K2["Status: COMPLIANT - Audit Archived"]
+        J2 -->|"Standard Traffic"| K3["Status: OBSERVATION - Telemetry Logged"]
     end
 
-    subgraph S7["7. Restitution & Exploitation"]
-        K1 & K2 & K3 --> L1["Dashboard Web Bilingue Glassmorphic"]
-        L1 --> L2["Cartouche Minéralogique Métallisé"]
-        L1 --> L3["Procès-Verbal Officiel (Export 1-Clic)"]
-        D2 & E2 --> L4["Flux MJPEG 30 FPS avec HUD Télémétrique"]
-        K1 --> L5["API REST JSON (/api/detect)"]
+    subgraph S7["7. User Interface & Export"]
+        K1 & K2 & K3 --> L1["Bilingual Glassmorphic Dashboard"]
+        L1 --> L2["Metallic License Plate Badge"]
+        L1 --> L3["Official Citation Report (1-Click Export)"]
+        D2 & E2 --> L4["30 FPS MJPEG Stream with HUD Overlay"]
+        K1 --> L5["JSON REST API Response (/api/detect)"]
     end
 ```
 
-### Description Détaillée des 8 Étapes du Workflow :
-
-1. **Acquisition & Ingestion des Médias** :
-   - *Mode Cliché* : Réception d'une photo haute définition (téléversement HTTP multipart ou scénario de test).
-   - *Mode CCTV* : Décodage continu via OpenCV d'un flux vidéo local ou caméra IP RTSP.
-2. **Aiguillage vers le Modèle Spécialisé (Dispatcher)** :
-   - Sélection automatique des poids neuronaux : `best_image.pt` pour la haute fidélité statique, ou `best_cctv.pt` pour la fluidité 30 FPS.
-3. **Prétraitement & Inférence Neuronale YOLOv5** :
-   - *Letterboxing* avec conservation stricte du ratio d'aspect sur canevas 640×640 (couleur de remplissage neutre 114).
-   - Passage dans le réseau convolutif PyTorch (`Conv`, `C3`, `SPPF`, `Detect`).
-   - Élimination des doublons par Non-Maximum Suppression (`torch_nms`, IoU seuil = 0.45).
-4. **Analyse Contextuelle Complémentaire (Vision par Ordinateur)** :
-   - Si aucun deux-roues n'est détecté, déclenchement de l'analyse d'habitacle automobile : détection faciale par cascade de Haar, isolation du torse et analyse des gradients de Sobel/Canny et lignes de Hough pour qualifier le port de la ceinture.
-5. **Découpage Dynamique des Preuves Visuelles (Dynamic ROI Crops)** :
-   - Extraction matricielle des sous-images haute résolution : tête du motard, motard complet et plaque d'immatriculation.
-6. **Reconnaissance Optique de Plaque ALPR** :
-   - Rehaussement de contraste adaptatif local (CLAHE), filtrage gaussien et débruitage.
-   - Inférence via réseaux neuronaux profonds CRAFT (détection de zones textuelles) et CRNN (transcription des caractères).
-   - Nettoyage regex alphanumérique pour formater le matricule officiel.
-7. **Qualification Juridique & Moteur Décisionnel** :
-   - Évaluation du statut légal au regard de l'**Article R431-1** (obligation du port du casque homologué pour conducteurs et passagers de deux-roues motorisés) et de l'**Article R412-1** (port obligatoire de la ceinture).
-   - Attribution d'un niveau de sévérité (`CRITIQUE`, `CONFORME`, `INFORMATIF`) et calcul de l'indice de certitude.
-8. **Restitution Multicanale & Génération de PV** :
-   - Rédaction instantanée du procès-verbal officiel prêt à être copié ou exporté.
-   - Rendu temps réel sur la console cybernétique (HUD télémétrique, cartouche minéralogique biseauté, tableau de coordonnées JSON).
-
 ---
 
-## 📦 Séparation Architecturale des 2 Modules
+## 📦 The Two Decoupled Operational Modules
 
-Pour garantir un compromis optimal entre **précision chirurgicale sur cliché radar** et **fluidité 30 FPS sur vidéosurveillance**, SafeCityAI sépare rigoureusement la logique applicative en deux modules autonomes :
-
-| Caractéristique | 📸 Module 1 : Analyse Photo & Verbalisation Légale | 🎥 Module 2 : Vidéosurveillance Caméra CCTV Temps Réel |
+| Specification | 📸 Module 1: Forensic Image Analysis | 🎥 Module 2: Live CCTV Surveillance & Webcam |
 | :--- | :--- | :--- |
-| **Vocation** | Audit médico-légal, contrôle radar haute résolution, qualification d'infraction. | Surveillance 24/7 de carrefours, filtrage du trafic, détection proactive d'anomalies. |
-| **Source d'entrée** | Fichiers images statiques (PNG, JPG, JPEG) via upload ou drag & drop. | Flux vidéo continu (MP4, WebM, flux IP RTSP/H.264) à 30 images par seconde. |
-| **Poids IA associés** | `weights/best_image.pt` (mAP@0.5 : 92.4%) + miroir protégé `best_image_backup.pt`. | `weights/best_cctv.pt` (calibré pour la vitesse, le flou de mouvement et l'angle CCTV). |
-| **Classes traitées** | 5 classes : `Helmet`, `No_Helmet`, `License_Plate`, `Seatbelt`, `No_Seatbelt`. | 4 classes ciblées deux-roues : `number plate`, `rider`, `with helmet`, `without helmet`. |
-| **Analyse ALPR** | Prétraitement morphologique complet (CLAHE + netteté + EasyOCR 100% local). | Lecture dynamique temps réel incrustée sur chaque boîte de plaque détectée. |
-| **Rendu & Interface** | Découpage des 3 vignettes de preuves (Crops), cartouche ALPR et Procès-Verbal officiel. | Réticule cybernétique HUD, horodatage synchronisé, FPS en direct et alertes clignotantes. |
-| **Point de terminaison** | `POST /api/detect` (Payload JSON complet avec verdict et coordonnées). | `GET /video/live_feed` (Streaming multipart MJPEG fluide à 30 FPS). |
+| **Purpose** | Forensic audit, speed/radar camera review, legal infraction qualification. | 24/7 intersection monitoring, proactive anomaly alerts, live field testing. |
+| **Input Source** | High-resolution static images (PNG, JPG, JPEG) via upload or gallery presets. | Continuous video (1080p WebM, RTSP/H.264 IP streams) or **physical PC webcam**. |
+| **Active Model** | `weights/best_image.pt` (92.4% mAP) + protected backup mirror. | `weights/best_cctv.pt` (calibrated for motion blur and perspective angles). |
+| **Target Classes** | 5 classes: `Helmet`, `No_Helmet`, `License_Plate`, `Seatbelt`, `No_Seatbelt`. | 4 classes: `number plate`, `rider`, `with helmet`, `without helmet`. |
+| **ALPR Pipeline** | Deep morphological filtering + CLAHE + local EasyOCR recognition. | Dynamic spatial tracking with live on-screen plate bounding box tags. |
+| **Interface** | 3 zoomed visual proof cards, embossed metal plate badge, and official citation report. | Cybernetic HUD overlay, synchronized timestamp, real-time FPS counter, and flash alert banner. |
+| **Endpoint** | `POST /api/detect` (Comprehensive JSON payload). | `GET /video/live_feed` (Zero-lag multipart MJPEG stream). |
 
-### 📸 Module 1 : Analyse Photo & Verbalisation Légale (Contrôle Cliché)
-* **Objectif** : Constituer un dossier d'infraction irréfutable pour les officiers assermentés.
-* **Fonctionnement** : L'utilisateur soumet une photo de circulation ou sélectionne un scénario préchargé. L'image est traitée à pleine résolution par le modèle `best_image.pt`. Le système isole immédiatement :
-  1. La **vignette Tête / Casque** : Zoom net certifiant le port ou le défaut de casque.
-  2. La **vignette Motard / Véhicule** : Vue d'ensemble du conducteur et de son véhicule en situation.
-  3. La **vignette Plaque Minéralogique** : Zoom sur la plaque d'immatriculation avec cartouche ALPR officiel.
-* **Procès-Verbal Automatisé** : Compilation en temps réel du texte de constatation légale (article de loi applicable, date/heure, immatriculation relevée, niveau de confiance du modèle).
+### 📸 Module 1: Forensic Image Analysis & Evidence Harvesting
+Designed to prepare dispute-proof legal evidence packages for enforcement officers:
+1. **Head & Helmet Crop**: Ultra-sharp zoom isolating the rider's head to prove presence or absence of a helmet.
+2. **Rider Context Crop**: Wide view capturing vehicle operation context and road positioning.
+3. **License Plate Crop**: Zoomed capture paired with an embossed metallic plate badge.
+4. **Legal Citation Report**: Formats statutory references, fine amounts, demerit points, timestamp, and machine-certified confidence scores.
 
-### 🎥 Module 2 : Vidéosurveillance Caméra CCTV Direct (30 FPS)
-* **Objectif** : Veille automatique continue sur les axes routiers majeurs et carrefours urbains.
-* **Fonctionnement** : Traitement à cadence élevée (30 FPS) optimisé par un modèle dédié `best_cctv.pt` entraîné sur des caméras d'angle plongeant avec flou de mouvement.
-* **Filtrage Intelligent** : Pour éliminer la pollution visuelle des véhicules conformes, l'affichage HUD filtre sélectivement les deux-roues et motards (`rider`, `with helmet`, `without helmet`, `number plate`).
-* **Incrustation Télémétrique (HUD)** : Réticule numérique, affichage du FPS réel, horodatage en direct, et bandeau d'alerte rouge clignotant lors d'une infraction constatée.
+### 🎥 Module 2: 30 FPS CCTV Video Surveillance & Live Physical Webcam
+* **Authentic 1080p Urban Camera (`saigon_part.webm`)**: Elevates surveillance realism with authentic, continuous footage of hundreds of motorcycles moving through an urban intersection.
+* **🔴 DIRECT Physical PC Webcam (`cv2.VideoCapture(0)`)**: Immediately captures live video from your computer's built-in webcam. Demonstrators can hold a helmet, phone, or printed plate directly in front of their machine for live testing!
+* **RTSP / IP Camera Support**: Connects to any networked security camera or DVR over RTSP/HTTP.
 
-### 🌉 Passerelle Inter-Modules (Bridge Handoff)
-Une synergie native relie les deux modules : lorsqu'une infraction est détectée en direct dans le **Module 2 (Vidéo CCTV)**, l'officier de contrôle clique sur le bouton **"Capturer Frame en 1 Clic"**.
-- La frame haute définition exacte est instantanément transférée au **Module 1 (Analyse Photo)** sans interruption du flux vidéo.
-- Le Module 1 prend alors le relais pour effectuer le zoom sur les preuves, la reconnaissance ALPR approfondie et la génération du procès-verbal officiel.
+### 🌉 Inter-Module Handoff Bridge
+When an infraction is spotted in live surveillance, the operator clicks **"📸 Capture Frame for Instant Scan"**:
+- The current uncompressed frame is captured directly from server RAM via `GET /api/cctv_snapshot` (preventing browser Canvas security taint).
+- The console smoothly transitions to Module 1, instantly producing zoomed proof crops, executing ALPR OCR, and generating an official legal report.
 
 ---
 
-## 🗄️ Architecture & Gestion des Datasets
+## 🌍 Multi-Regional Legal Framework & ALPR Formats
 
-Pour éviter tout conflit ou dégradation du modèle statique lors de l'entraînement sur des vidéos CCTV, les jeux de données d'apprentissage sont rigoureusement partitionnés :
+SafeCityAI features a multi-regional compliance engine that adapts legal statutory citations, currency, fine schedules, and plate regex patterns on the fly:
 
-### 1. Partitionnement Physique des Données
+| Jurisdiction | Flag | Statutory Reference | Standard Fine | Plate Format Example | Cantons / States |
+| :--- | :---: | :--- | :--- | :--- | :--- |
+| **Universal Auto** | 🌍 | Automatic Detection | Regional Schedule | Standardized Regex | Dynamic |
+| **Switzerland** | 🇨🇭 | LCR / OCR Art. 3b | 60 CHF | `BE 43772` | 26 Cantons (`BE`, `ZH`, `VD`, `GE`...) |
+| **France** | 🇫🇷 | Code de la Route Art. R431-1 | 135 € + 3 Demerit Points | `AB-123-CD` (SIV 2-3-2) | Metropolitan & Overseas |
+| **India** | 🇮🇳 | Motor Vehicles Act Sec. 129 | ₹1,000 INR + 3 Mo. Suspension | `TN 09 BJ 4054` (RTO Standard) | 28 States & 8 UTs (`TN`, `DL`, `MH`...) |
 
+---
+
+## 🗄️ Dataset Architecture & Partitioning
+
+To avoid catastrophic forgetting and model degradation when fine-tuning on CCTV feeds, training datasets are physically isolated:
+
+### 1. Physical Directory Structure
 ```text
 safecity-ai/
 ├── datasets/
-│   ├── dataset_image/            # Base de données dédiée au Module 1 (Photos fixes)
-│   │   ├── images/
-│   │   │   ├── train/            # Images d'entraînement haute résolution
-│   │   │   └── val/              # Images de validation
-│   │   ├── labels/
-│   │   │   ├── train/            # Annotations YOLO (.txt) normalisées [class cx cy w h]
-│   │   │   └── val/
-│   │   └── data.yaml             # Configuration 5 classes (Helmet, No_Helmet, License_Plate, Seatbelt, No_Seatbelt)
+│   ├── dataset_image/            # Module 1 (Forensic Static Photos)
+│   │   ├── images/train/ & val/  # High-resolution radar photos
+│   │   ├── labels/train/ & val/  # YOLO .txt labels [class cx cy w h]
+│   │   └── data.yaml             # 5 Classes (Helmet, No_Helmet, License_Plate, Seatbelt, No_Seatbelt)
 │   │
-│   ├── dataset_cctv/             # Base de données dédiée au Module 2 (Vidéosurveillance)
-│   │   ├── images/
-│   │   │   ├── train/            # 150+ frames réelles extraites de vidéos de trafic urbain
-│   │   │   └── val/              # Frames de validation avec flou cinétique
-│   │   ├── labels/
-│   │   │   ├── train/            # Annotations générées semi-automatiquement
-│   │   │   └── val/
-│   │   └── data_cctv.yaml        # Configuration 4 classes (number plate, rider, with helmet, without helmet)
+│   ├── dataset_cctv/             # Module 2 (Video Surveillance)
+│   │   ├── images/train/ & val/  # 150+ CCTV frames with motion blur
+│   │   ├── labels/train/ & val/  # Semi-automated labels
+│   │   └── data_cctv.yaml        # 4 Classes (number plate, rider, with helmet, without helmet)
 │   │
-│   └── README.md                 # Spécification technique des bases de données
-│
-├── dataset/                      # Dataset synthétique initial (Mock) pour tests unitaires rapides
-│   └── generate_mock_data.py     # Générateur procédural d'images de test avec annotations
-│
-└── ccpd_tool.py                  # Parseur officiel du dataset CCPD pour plaques d'immatriculation
+│   └── README.md
 ```
 
-### 2. Classes et Formats d'Annotation YOLOv5
-
-Les coordonnées des boîtes englobantes suivent le standard normalisé YOLOv5 :
+### 2. YOLOv5 Annotation Formats & Classes
+Bounding box coordinates follow the standard YOLOv5 normalized convention:
 ```text
 <class_id> <x_center> <y_center> <width> <height>
 ```
-*Toutes les valeurs sont relatives et normalisées entre `0.0` et `1.0`.*
+*(All coordinates are relative floats in the range `[0.0, 1.0]`)*
 
-* **Schéma `dataset_image/data.yaml` (5 Classes)** :
-  - `0: Helmet` (Casque porté)
-  - `1: No_Helmet` (Défaut de casque / Infraction)
-  - `2: License_Plate` (Plaque d'immatriculation)
-  - `3: Seatbelt` (Ceinture attachée)
-  - `4: No_Seatbelt` (Défaut de ceinture)
-
-* **Schéma `dataset_cctv/data_cctv.yaml` (4 Classes Trafic Deux-Roues)** :
-  - `0: number plate` (Plaque minéralogique moto/scooter)
-  - `1: rider` (Conducteur / Motard)
-  - `2: with helmet` (Casque réglementaire détecté)
-  - `3: without helmet` (Motard sans casque / Alerte)
-
-### 3. Outils du Cycle de Données (Data Toolchain)
-
-Pour alimenter, enrichir et exploiter ces jeux de données, SafeCityAI fournit une suite d'outils CLI dédiés :
-
-* 🎬 **`extract_cctv_frames.py`** : Découpe automatiquement les flux vidéo bruts (`.mp4`, `.webm`) en frames exploitables avec échantillonnage réglable (ex: 1 frame toutes les 15 frames) et répartition aléatoire automatique en splits `train` (80%) et `val` (20%).
-  ```bash
-  python extract_cctv_frames.py --video input_traffic.mp4 --interval 15
-  ```
-
-* 🏷️ **`auto_annotate_cctv.py`** : Moteur de pseudo-étiquetage automatisé. Applique le modèle d'inférence existant sur les nouvelles images CCTV extraites pour générer les fichiers `.txt` de labels correspondants, accélérant l'annotation humaine d'un facteur 10.
-  ```bash
-  python auto_annotate_cctv.py
-  ```
-
-* 🇨🇳 **`ccpd_tool.py`** : Parseur pour la base internationale CCPD (*Chinese City Parking Dataset*). Extrait automatiquement les boîtes englobantes, matricules alphanumériques, indices de luminosité et de flou cinétique depuis les noms de fichiers pour l'entraînement ALPR en conditions dégradées.
-  ```bash
-  python ccpd_tool.py
-  ```
-
-* 🛡️ **`train_cctv_isolated.py`** : Script d'entraînement sécurisé et cloisonné. Vérifie la présence de la sauvegarde `best_image_backup.pt`, lance le fine-tuning YOLOv5 exclusivement sur `dataset_cctv/` et déploie le modèle résultant dans `weights/best_cctv.pt` sans jamais risquer de corrompre `weights/best_image.pt`.
-  ```bash
-  python train_cctv_isolated.py
-  ```
+### 3. CLI Data Toolchain
+* 🎬 **`extract_cctv_frames.py`**: Extracts frames from raw video (`.mp4`, `.webm`) at a configurable stride (e.g., every 15 frames) and splits them into `train` (80%) and `val` (20%).
+* 🏷️ **`auto_annotate_cctv.py`**: Pseudo-labeling utility that runs an existing model over extracted frames to create initial `.txt` annotations, accelerating manual review 10x.
+* 🇨🇳 **`ccpd_tool.py`**: Parser for the international CCPD dataset (*Chinese City Parking Dataset*), extracting bounding boxes, plate strings, and blur ratings directly from image filenames.
+* 🛡️ **`train_cctv_isolated.py`**: Guarded fine-tuning script that verifies backup integrity before training on `dataset_cctv/`, ensuring `best_image.pt` is never touched.
 
 ---
 
-## 🎓 Guide d'Entraînement : Comment Obtenir `best.pt` via Roboflow & Google Colab
+## 🎓 Model Training Guide: How to Obtain `best.pt` with Roboflow & Google Colab
 
-Le fichier **`best.pt`** représente le point d'orgue de l'apprentissage profond : il contient les poids synaptiques optimaux du réseau de neurones YOLOv5 qui maximisent la précision moyenne (**mAP@0.5**) sur le jeu de données de test.
+The **`best.pt`** checkpoint contains the optimal PyTorch neural weights yielding the highest mean Average Precision (**mAP@0.5**) on validation data.
 
-Voici la méthodologie étape par étape pour concevoir votre jeu de données, entraîner le modèle sur **Google Colab avec GPU gratuit**, et exporter `best.pt` dans SafeCityAI :
+### Step 1: Label and Export on Roboflow
+1. Create an account on [roboflow.com](https://roboflow.com/) and start a new **Object Detection** project.
+2. Define target classes (`Helmet`, `No_Helmet`, `License_Plate`, `Rider`).
+3. Upload frames extracted via `extract_cctv_frames.py` and draw bounding boxes.
+4. Apply recommended augmentations: Horizontal Flip, Random Crop (0-20%), Brightness/Contrast (±15%), Motion Blur (up to 2.5px), and Mosaic (4-up).
+5. Click **Generate Version** > **Export Dataset**, select **`YOLOv5 PyTorch`**, and download the `.zip` archive.
 
-### 1. 📦 Constitution et Annotation du Dataset sur Roboflow
+### Step 2: Train on Google Colab (Free T4 GPU)
+The repository includes a ready-to-run notebook: [`notebooks/SafeCityAI_YOLOv5.ipynb`](notebooks/SafeCityAI_YOLOv5.ipynb).
 
-[Roboflow](https://roboflow.com/) est la plateforme de référence pour labelliser, augmenter et exporter des bases de données de vision par ordinateur au format YOLOv5 :
-
-1. **Création du Projet** :
-   - Créez un compte gratuit sur [roboflow.com](https://roboflow.com/) et créez un nouveau projet de type **Object Detection**.
-   - Nommez le projet (ex : `safecity-traffic-detection`).
-2. **Définition de l'Ontologie des Classes** :
-   - Ajoutez vos classes cibles : `Helmet`, `No_Helmet`, `License_Plate`, `Rider` (et optionnellement `Seatbelt`, `No_Seatbelt`).
-3. **Importation & Étiquetage (Labeling)** :
-   - Téléversez vos photos de rue ou les frames extraites de vos vidéos avec `extract_cctv_frames.py`.
-   - Utilisez l'outil de cadrage rectangulaire pour dessiner les boîtes englobantes autour des têtes (avec/sans casque), des motards et des plaques.
-4. **Augmentation des Données (Data Augmentation)** :
-   - Pour rendre le modèle robuste au flou de mouvement, aux reflets du soleil et à la nuit, activez les augmentations recommandées :
-     - *Flips horizontaux* (50%).
-     - *Crop & Zoom aléatoires* (0% à 20%).
-     - *Ajustement de luminosité et contraste* (±15%).
-     - *Flou cinétique (Blur)* (jusqu'à 2.5px pour simuler la vitesse).
-     - *Mosaïque 4 images (Mosaic 4-up)* : assemble 4 images en une seule pour forcer la détection d'objets de petite taille (plaques et casques lointains).
-5. **Exportation au Format YOLOv5 PyTorch** :
-   - Cliquez sur **Generate Version**, puis sur **Export Dataset**.
-   - Choisissez impérativement le format **`YOLOv5 PyTorch`**.
-   - Téléchargez l'archive `.zip` (ex: `rider-helmet-no-helmet-lic-plate.yolov5pytorch.zip`) ou copiez le snippet de téléchargement direct par clé API.
-
----
-
-### 2. ⚡ Entraînement Haute Performance sur Google Colab (GPU Gratuit)
-
-Le projet intègre un notebook Jupyter complet prêt à l'emploi : [`notebooks/SafeCityAI_YOLOv5.ipynb`](notebooks/SafeCityAI_YOLOv5.ipynb).
-
-Suivez ce protocole pas à pas pour entraîner votre modèle en ~15 minutes :
-
-#### Étape A : Configuration de la Machine Virtuelle avec GPU
-1. Rendez-vous sur [Google Colab](https://colab.research.google.com/) et ouvrez le notebook [`notebooks/SafeCityAI_YOLOv5.ipynb`](notebooks/SafeCityAI_YOLOv5.ipynb) (ou déposez-le sur votre Google Drive).
-2. Activez l'accélérateur matériel : Menu **Exécution > Modifier le type d'exécution > Accélérateur matériel > T4 GPU**.
-3. Vérifiez la disponibilité de la carte graphique :
+1. Open the notebook in [Google Colab](https://colab.research.google.com/).
+2. Enable hardware acceleration: **Runtime > Change runtime type > T4 GPU**.
+3. Clone YOLOv5 and install dependencies:
    ```bash
-   !nvidia-smi
+   !git clone https://github.com/ultralytics/yolov5.git
+   %cd yolov5
+   !pip install -r requirements.txt
    ```
+4. Upload your dataset archive to `/content` and extract it:
+   ```python
+   import zipfile
+   with zipfile.ZipFile('/content/dataset.zip', 'r') as zip_ref:
+       zip_ref.extractall('/content/dataset')
+   ```
+5. Launch transfer learning from pre-trained COCO weights:
+   ```bash
+   !python train.py --img 640 --batch 16 --epochs 50 --data /content/dataset/data.yaml --weights yolov5s.pt --cache
+   ```
+6. Download the resulting weights from `runs/train/exp/weights/best.pt`.
 
-#### Étape B : Installation de l'Environnement Ultralytics YOLOv5
-```python
-# Cloner le dépôt officiel Ultralytics et installer les dépendances
-!git clone https://github.com/ultralytics/yolov5.git
-%cd yolov5
-!pip install -r requirements.txt
-```
-
-#### Étape C : Décompression du Dataset Roboflow
-Glissez-déposez votre archive ZIP issue de Roboflow dans la barre latérale gauche de Colab (dossier `/content`), puis exécutez :
-```python
-import zipfile
-import os
-
-%cd /content
-zip_path = "rider-helmet-no-helmet-lic-plate.yolov5pytorch.zip"
-
-with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-    zip_ref.extractall("dataset")
-
-print("Dataset prêt dans /content/dataset !")
-%cd /content/yolov5
-```
-
-#### Étape D : Lancement du Transfer Learning (Entraînement)
-Lancez l'apprentissage par transfert à partir des poids pré-entraînés `yolov5s.pt` (small - rapide et léger pour l'inférence temps réel) :
+### Step 3: Deploy to SafeCityAI
+Copy the downloaded `best.pt` into `safecity-ai/weights/best_image.pt` (or `best_cctv.pt`) and restart the server:
 ```bash
-!python train.py \
-  --img 640 \
-  --batch 16 \
-  --epochs 50 \
-  --data /content/dataset/data.yaml \
-  --weights yolov5s.pt \
-  --cache
-```
-
-* **`--img 640`** : Résolution standard native des réseaux YOLO.
-* **`--batch 16`** : Taille de lot optimisée pour les 16 Go de VRAM du GPU Tesla T4.
-* **`--epochs 50`** : Nombre de cycles complets d'apprentissage (suffisant pour converger avec transfer learning).
-* **`--weights yolov5s.pt`** : Point de départ pré-entraîné sur les 80 classes COCO.
-
-#### Étape E : Téléchargement du Fichier `best.pt`
-À la fin des 50 epochs, YOLOv5 sauvegarde automatiquement le checkpoint ayant obtenu le meilleur mAP dans `runs/train/exp/weights/best.pt`.
-Téléchargez-le sur votre poste local via :
-```python
-from google.colab import files
-files.download('runs/train/exp/weights/best.pt')
+python server.py
 ```
 
 ---
 
-### 3. 🔌 Déploiement de `best.pt` dans SafeCityAI
+## 🌐 Open-Source License Plate Datasets & Repositories
 
-Une fois le fichier `best.pt` téléchargé :
-1. Placez une copie à la racine du projet : `safecity-ai/best.pt`.
-2. Placez la copie active dans le dossier des modèles : `safecity-ai/weights/best_image.pt`.
-3. Conservez impérativement la copie de secours en lecture seule : `safecity-ai/weights/best_image_backup.pt`.
-4. Relancez le serveur :
-   ```bash
-   python server.py
-   ```
-   SafeCityAI chargera automatiquement vos nouveaux poids neuronaux certifiés avec votre nouvelle cartographie de classes !
-
----
-
-## 🌐 Dépôts Open Source GitHub & Datasets pour Plaques d'Immatriculation
-
-Si vous recherchez des jeux de données réels massifs ou des modèles pré-entraînés spécialisés dans la détection et la lecture de plaques minéralogiques (**ALPR / ANPR / License Plate Recognition**), voici les meilleures ressources open source éprouvées :
-
-| Nom de la Ressource | Lien Officiel GitHub / Source | Description & Points Forts |
+| Dataset / Project | Repository / Source | Description |
 | :--- | :--- | :--- |
-| **CCPD (Chinese City Parking Dataset)** | [github.com/detectRecog/CCPD](https://github.com/detectRecog/CCPD) | **+250 000 images** haute résolution de plaques en conditions réelles (pluie, nuit, neige, inclinaisons extrêmes jusqu'à 60°, flou cinétique). *Intégré nativement dans SafeCityAI via `ccpd_tool.py`*. |
-| **Indian Number Plate Detection (YOLOv5)** | [github.com/Anurag-Bambardekar/...](https://github.com/Anurag-Bambardekar/Indian-Number-Plate-Recognition-using-YOLOv5) | Modèle YOLOv5 et pipeline EasyOCR spécialement entraînés sur les **plaques d'immatriculation indiennes (formats RTO à 1 et 2 lignes)** pour motos et voitures. |
-| **Roboflow Universe - Vehicle License Plates** | [universe.roboflow.com/search?q=license+plate](https://universe.roboflow.com/search?q=license+plate) | Des dizaines de banques de données communautaires gratuites contenant des milliers d'images annotées pour plaques motos (recherchez : *motorcycle helmet*, *indian license plates*, *european license plates*). |
-| **OpenALPR Benchmarks & Datasets** | [github.com/openalpr/benchmarks](https://github.com/openalpr/benchmarks) | Banc d'essai officiel open-source contenant des flux vidéos et photos de véhicules avec étiquetage au caractère près pour calibrer l'OCR. |
-| **UFPR-ALPR Dataset (Motos & Voitures)** | [github.com/raysonlaroca/ufpr-alpr-dataset](https://github.com/raysonlaroca/ufpr-alpr-dataset) | **4 500 images et 150 vidéos** de circulation réelle filmées par des caméras de surveillance routières avec annotations complètes véhicule + plaque + caractères individuels. |
-| **Ultralytics YOLOv5 Official Hub** | [github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5) | Code source de référence, gestionnaires d'export TensorRT/ONNX et documentation pour adapter les têtes de détection. |
+| **CCPD (Chinese City Parking Dataset)** | [github.com/detectRecog/CCPD](https://github.com/detectRecog/CCPD) | **250,000+** high-resolution plates under challenging real-world conditions (rain, night, tilt angles up to 60°). |
+| **Indian Number Plate Recognition (YOLOv5)** | [github.com/Anurag-Bambardekar/...](https://github.com/Anurag-Bambardekar/Indian-Number-Plate-Recognition-using-YOLOv5) | Model and EasyOCR pipeline specialized for **single-line and dual-line RTO motorcycle plates**. |
+| **Roboflow Universe License Plates** | [universe.roboflow.com](https://universe.roboflow.com/search?q=license+plate) | Large collection of community-annotated vehicle and motorcycle license plate datasets. |
+| **OpenALPR Benchmarks** | [github.com/openalpr/benchmarks](https://github.com/openalpr/benchmarks) | Character-level accuracy evaluation suite for benchmarking ALPR accuracy. |
+| **UFPR-ALPR Dataset** | [github.com/raysonlaroca/ufpr-alpr-dataset](https://github.com/raysonlaroca/ufpr-alpr-dataset) | **4,500 images and 150 videos** captured by traffic cameras with character bounding boxes. |
 
 ---
 
-## ✨ Fonctionnalités Clés / Key Features
+## ✨ Key Features
 
-- 🌐 **Interface Entièrement Bilingue (FR 🇫🇷 / EN 🇬🇧)** : Bascule instantanée sans rechargement de page avec mémorisation des préférences dans le navigateur (`localStorage`).
-- 🔍 **Preuves Visuelles Découpées (Dynamic Crops)** : Découpage et zoom automatique sur la tête du conducteur, le motard et la plaque minéralogique pour vérification visuelle immédiate.
-- 🏷️ **Cartouche Minéralogique ALPR Métallisé** : Affichage haute fidélité de la plaque extraite, prêt pour interconnexion au fichier national des véhicules.
-- 📋 **Procès-Verbal Automatisé** : Rédaction en temps réel du constat juridique officiel (qualification légale, équipement constaté, immatriculation relevée, action requise).
-- 🎥 **Contrôles Vidéo Complets** : Play / Pause du flux direct, bascule vers simulateur 2D cybernétique, capture instantanée de frame.
-- 📊 **Tableau Télémétrique & Inspecteur JSON** : Liste exhaustive des coordonnées `[x, y, w, h]` et niveaux de confiance certifiés par l'IA.
-
----
-
-## 🌐 Système Bilingue / Bilingual UI
-
-Le sélecteur de langue situé dans l'en-tête supérieur permet d'adapter l'ensemble de la console à l'utilisateur :
-
-| Élément d'interface | Version Française 🇫🇷 | Version Anglaise 🇬🇧 |
-| :--- | :--- | :--- |
-| **Sous-titre En-tête** | Console Autonome de Sécurité Routière & Verbalisation par IA | Autonomous Road Safety & AI Traffic Violation Enforcement Console |
-| **Onglet 1** | Mode Analyse Image (Contrôle Cliché) | Image Analysis Mode (Snapshot Inspection) |
-| **Onglet 2** | Mode Vidéosurveillance Caméra (Direct 30 FPS) | CCTV Video Surveillance Mode (Live 30 FPS) |
-| **Verdict Infraction** | Défaut de Port du Casque de Protection Obligatoire | Failure to Wear Mandatory Safety Helmet |
-| **Verdict Conforme** | Casque Réglementaire Porté & Homologué | Approved Helmet Worn & Verified |
-| **Preuves Visuelles** | Preuves Visuelles Découpées (Zooms Haute Précision) | Visual Evidence Crops (High-Precision Zooms) |
-| **Rapport Officiel** | Rapport Opérationnel pour Officier de Contrôle | Official Inspection Report for Enforcement Officer |
+- 🌐 **Seamless Bilingual UI (FR 🇫🇷 / EN 🇬🇧)**: Instant client-side translation without page reload; persists language preference in `localStorage`.
+- 🌍 **Multi-Regional Legal Compliance**: Dynamic switching between Universal Auto, Switzerland (LCR), France (SIV), and India (RTO).
+- 🔍 **Dynamic Proof Crops**: Automatically harvests and displays high-resolution zoomed crops for helmet, rider, and plate verification.
+- 🏷️ **Embossed Metal License Plate Badge**: High-fidelity visual tag displaying recognized alphanumeric text.
+- 📋 **Automated Legal Citations**: One-click clipboard copy and text dossier download with timestamp, statutory reference, and certified confidence.
+- 🎥 **Authentic CCTV Video & Live Webcam Capture**: 30 FPS streaming with live HUD, telemetry, and one-click snapshot handoff.
 
 ---
 
-## 📁 Structure Complète du Projet
+## 📁 Repository Structure
 
 ```text
 safecity-ai/
-├── alpr_ocr.py               # Moteur de reconnaissance optique de plaques (EasyOCR local)
-├── model_engine.py           # Gestionnaire d'inférence double-modèle YOLOv5
-├── server.py                 # Serveur Web Flask (API REST + Flux streaming MJPEG)
-├── client_test.py            # Script client de test d'envoi d'image par requête HTTP POST
-├── test_pipeline.py          # Script de validation complète sur l'ensemble des scénarios
-├── train_cctv_isolated.py    # Entraînement isolé pour le modèle de caméra CCTV
-├── extract_cctv_frames.py    # Découpage vidéo automatique en frames annotables
-├── auto_annotate_cctv.py     # Pré-annotation assistée par modèle source
-├── ccpd_tool.py              # Convertisseur de plaques CCPD pour enrichissement ALPR
+├── alpr_ocr.py               # Local ALPR engine (CRAFT + CRNN via EasyOCR)
+├── model_engine.py           # Dual-model YOLOv5 inference engine
+├── server.py                 # Flask web server (REST API & MJPEG streaming)
+├── client_test.py            # Automated HTTP client test script
+├── test_pipeline.py          # End-to-end multi-scenario test suite
+├── train_cctv_isolated.py    # Isolated CCTV model training runner
+├── extract_cctv_frames.py    # Video frame extractor and dataset splitter
+├── auto_annotate_cctv.py     # Assisted pseudo-labeling tool
+├── ccpd_tool.py              # CCPD dataset parser for ALPR training
 │
-├── datasets/                 # Bases de données YOLOv5 strictement partitionnées
-│   ├── dataset_image/        # Clichés fixes (images + labels YOLO train/val)
-│   ├── dataset_cctv/         # Flux vidéo CCTV (images + labels YOLO train/val)
-│   └── README.md             # Documentation des jeux de données
+├── datasets/                 # Strictly partitioned training datasets
+│   ├── dataset_image/        # High-resolution static photos (train/val)
+│   ├── dataset_cctv/         # CCTV video frames (train/val)
+│   └── README.md
 │
-├── weights/                  # Poids neuronaux pré-entraînés
-│   ├── best_image.pt         # Modèle photo (92.4% mAP)
-│   ├── best_image_backup.pt  # Sauvegarde sécurisée en lecture seule
-│   ├── best_cctv.pt          # Modèle vidéosurveillance urbaine 30 FPS
-│   └── README.md             # Guide d'architecture des modèles
+├── weights/                  # Pre-trained deep neural weights
+│   ├── best_image.pt         # Forensic photo model (92.4% mAP)
+│   ├── best_image_backup.pt  # Read-only protected backup
+│   ├── best_cctv.pt          # Real-time 30 FPS CCTV model
+│   └── README.md
 │
-├── static/                   # Ressources statiques frontend
-│   ├── style.css             # Feuille de style CSS cyberpunk & glassmorphic
-│   ├── app.js                # Contrôleur JS, gestion bilingue et rendu des preuves
-│   └── samples/              # 6 Photos réelles de circulation pour test immédiat
+├── static/                   # Frontend assets
+│   ├── style.css             # Cyberpunk glassmorphic CSS design system
+│   ├── app.js                # Bilingual controller & UI rendering logic
+│   └── samples/              # 6 Real-world sample traffic images
 │
 ├── templates/
-│   └── index.html            # Interface web complète avec balisage sémantique
+│   └── index.html            # Semantic HTML5 single-page application
 │
-├── notebooks/                # Notebooks d'expérimentation et d'entraînement
+├── notebooks/                # Experimentation and training notebooks
 │   ├── SafeCityAI_YOLOv5.ipynb
-│   └── yolov5/               # Code source officiel Ultralytics YOLOv5
+│   └── yolov5/               # Official Ultralytics YOLOv5 source code
 │
-├── run_safecity.bat          # Lanceur automatique 1-clic pour Windows
-├── start.sh                  # Lanceur multi-plateforme Linux / macOS
-├── git_push.bat              # Script d'automatisation des commits & push GitHub
-├── requirements.txt          # Dépendances Python du projet
-├── LICENSE                   # Licence officielle MIT
-├── .gitignore                # Exclusion des fichiers temporaires et médias lourds
-└── README.md                 # Documentation principale du projet
+├── run_safecity.bat          # 1-Click launcher for Windows
+├── start.sh                  # Shell launcher for Linux & macOS
+├── requirements.txt          # Python project dependencies
+├── LICENSE                   # Open-source MIT License
+├── README_FR.md              # Documentation complète en Français
+└── README.md                 # Primary English documentation
 ```
 
 ---
 
-## 🚀 Démarrage Rapide / Quickstart
+## 🚀 Quickstart Guide
 
-### Prérequis
-- **Python 3.10 ou supérieur** installé ([python.org](https://www.python.org/downloads/)).
-- **Git** installé ([git-scm.com](https://git-scm.com/)).
-- Navigateur web moderne (Chrome, Edge, Firefox, Brave).
+### Prerequisites
+* **Python 3.10+** installed ([python.org](https://www.python.org/downloads/)).
+* **Git** installed ([git-scm.com](https://git-scm.com/)).
+* A modern web browser (Chrome, Edge, Firefox, Brave).
 
-### Option 1 : Lancement Automatique en 1 Clic (Recommandé)
+### Option 1: 1-Click Launch (Recommended)
+* **On Windows**: Double-click `run_safecity.bat`.
+* **On Linux / macOS**: Run `chmod +x start.sh && ./start.sh`.
 
-* **Sous Windows :**
-  Double-cliquez simplement sur le fichier :
-  ```cmd
-  run_safecity.bat
-  ```
+### Option 2: Manual Terminal Setup
+```bash
+# 1. Clone repository
+git clone https://github.com/ratovoarisoaricardo/Safety-AI.git
+cd Safety-AI
 
-* **Sous Linux ou macOS :**
-  Ouvrez un terminal et exécutez :
-  ```bash
-  chmod +x start.sh && ./start.sh
-  ```
+# 2. Create and activate virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
-Le script configure automatiquement l'environnement virtuel, installe les dépendances nécessaires et démarre le serveur sur `http://localhost:5000`.
+# 3. Install dependencies
+pip install -r requirements.txt
 
----
-
-### Option 2 : Installation Manuelle via Terminal
-
-1. **Cloner le dépôt :**
-   ```bash
-   git clone https://github.com/ratovoarisoaricardo/Safety-AI.git
-   cd Safety-AI
-   ```
-
-2. **Créer et activer un environnement virtuel :**
-   ```bash
-   # Windows (PowerShell / CMD)
-   python -m venv venv
-   venv\Scripts\activate
-
-   # Linux / macOS
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Installer les dépendances :**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Lancer le serveur SafeCityAI :**
-   ```bash
-   python server.py
-   ```
-
-5. **Accéder à la console :**
-   Ouvrez votre navigateur sur **[http://localhost:5000](http://localhost:5000)**.
+# 4. Start the server
+python server.py
+```
+Open your browser at **[http://localhost:5000](http://localhost:5000)**.
 
 ---
 
-## 🔌 Spécification de l'API REST
+## 🔌 REST API Specification
 
-### 1. Inférence & Détection d'Infractions (`POST /api/detect`)
-Permet de soumettre une image (multipart/form-data) et d'obtenir l'analyse complète au format JSON.
+### 1. Detect Violations on Still Image (`POST /api/detect`)
+Submit an image file via multipart form data for full neural inference and ALPR analysis.
 
-* **URL** : `http://localhost:5000/api/detect`
-* **Méthode** : `POST`
-* **Paramètres** :
-  - `image` (Fichier binaire) : Image au format PNG, JPG ou JPEG.
-  - `source_hint` *(Optionnel)* : `'photo'` (défaut) ou `'cctv_stream'`.
+* **URL**: `/api/detect`
+* **Method**: `POST`
+* **Payload**: `image` (binary file, PNG/JPG/JPEG), `source_hint` *(optional)*: `'photo'` or `'cctv_stream'`.
 
-#### Exemple de Réponse JSON :
+#### Sample Response:
 ```json
 {
   "status": "success",
@@ -620,97 +427,70 @@ Permet de soumettre une image (multipart/form-data) et d'obtenir l'analyse compl
     }
   ],
   "plate_detected": "TN 09 BJ 4054",
-  "counts": {
-    "total": 3,
-    "rider": 1,
-    "with helmet": 0,
-    "without helmet": 1,
-    "number plate": 1
-  },
-  "image_info": {
-    "width": 640,
-    "height": 480
+  "verdict": {
+    "status": "VIOLATION",
+    "label": "INFRACTION DÉTECTÉE : CONDUCTEUR SANS CASQUE",
+    "confidence": 0.948,
+    "plate": "TN 09 BJ 4054",
+    "region": "IN",
+    "penalty_fr": "Amende forfaitaire de ₹1,000 INR + suspension 3 mois"
   }
 }
 ```
 
-### 2. Flux Vidéo Direct CCTV (`GET /video/live_feed`)
-* **URL** : `http://localhost:5000/video/live_feed`
-* **Méthode** : `GET`
-* **Type MIME** : `multipart/x-mixed-replace; boundary=frame`
-* **Description** : Flux vidéo streaming MJPEG continu à 30 FPS avec boîtes englobantes dynamiques et matricules incrustés.
+### 2. Live CCTV Stream (`GET /video/live_feed`)
+Provides a continuous, low-latency multipart MJPEG video stream at 30 FPS with embedded HUD bounding boxes and telemetry.
+
+### 3. Change Video / Camera Source (`POST /api/set_cctv_video`)
+Switches live feed between physical PC webcam (`{"video": "0"}`), real traffic video (`{"video": "saigon_part.webm"}`), or external network streams (`{"video": "rtsp://..."}`).
+
+### 4. High-Definition Memory Snapshot (`GET /api/cctv_snapshot`)
+Retrieves the current raw uncompressed video frame in PNG format directly from server RAM.
 
 ---
 
-## 🧪 Tests Automatisés & Validation
+## 🧪 Automated Testing & Verification
 
-Pour exécuter la suite de tests unitaires et vérifier la détection sur l'ensemble des scénarios de test :
-
+Run the automated test suite across all pre-loaded scenarios:
 ```bash
 python test_pipeline.py
 ```
 
-Pour simuler une requête cliente complète vers l'API Flask :
+Simulate an external HTTP client POST request:
 ```bash
 python client_test.py
 ```
 
 ---
 
-## 🔮 Suggestions d'Améliorations & Roadmap Technique
+## 🔮 Production Roadmap & Engineering Enhancements
 
-Pour faire évoluer SafeCityAI vers une solution industrielle prête pour le déploiement opérationnel à grande échelle, voici les axes d'extension recommandés :
-
-### 1. 🎯 Tracking Multi-Objets Persistant (ByteTrack / BoT-SORT)
-* **État Actuel** : L'analyse vidéo s'effectue image par image sans mémorisation des véhicules entre deux frames.
-* **Ajout Conseillé** : Intégrer un algorithme de suivi bayésien comme **ByteTrack** ou **BoT-SORT** pour affecter un identifiant persistant unique à chaque motard (`Track ID #102`).
-* **Bénéfice Clé** : Élimination radicale des doublons de contraventions (un même motard filmé pendant 5 secondes ne recevra qu'une seule verbalisation consolidée au lieu de 50 alertes répétitives).
-
-### 2. 🗄️ Base de Données Relationnelle & Historique des PV (PostgreSQL / SQLite)
-* **État Actuel** : Les détections sont transmises de manière volatile au frontend sans persistance en base.
-* **Ajout Conseillé** : Intégration d'un ORM (SQLAlchemy) adossé à **PostgreSQL** ou **SQLite** avec une table `infractions` :
-  - `id` (UUID), `timestamp` (horodatage certifié), `plate_number` (matricule certifié).
-  - `violation_type` (ex: Défaut de casque Art. R431-1), `confidence` (taux IA).
-  - `proof_image_path` (chemin vers la photo preuve), `status` (*En attente*, *Validé par officier*, *Avis expédié*, *Archivé*).
-  - `officer_notes` (commentaires de l'agent de contrôle).
-
-### 3. 📄 Génération de PV Officiels au Format PDF Certifié (ReportLab)
-* **Ajout Conseillé** : Module d'exportation en 1 clic d'un document officiel A4 prêt pour notification postale ou signature électronique comprenant :
-  - En-tête officiel de la Police Municipale / Préfecture / Ministère des Transports.
-  - Horodatage certifié et coordonnées GPS précises de la caméra de circulation.
-  - Les 3 vignettes de preuves incrustées (tête nue, silhouette moto, zoom plaque).
-  - Cadre juridique avec rappel des sanctions (amende forfaitaire de 4ème classe, retrait de 3 points).
-  - QR Code dynamique de télépaiement direct ou de contestation en ligne.
-
-### 4. 🚦 Détection d'Infractions Routières Complémentaires
-* **Radar de Vitesse par Vision Optique** : Mesure de la vitesse instantanée par flux optique (*Optical Flow*) ou homographie sur deux repères tracés au sol.
-* **Franchissement de Feu Rouge & Ligne Continue** : Définition de zones polygonales virtuelles interdites ; déclenchement automatique d'alerte si une boîte englobante franchit la ligne stop en phase de feu rouge.
-* **Détection du Téléphone au Volant** : Modèle d'estimation de pose humaine (YOLO-Pose ou MediaPipe) détectant le bras levé et l'appareil porté à l'oreille.
-* **Circulation en Sens Interdit & Voies Réservées** : Détection vectorielle des trajectoires contraires au sens de circulation ou circulation indue sur couloir de bus / piste cyclable.
-
-### 5. ⚡ WebSockets & Alertes Déportées en Temps Réel
-* Remplacement du polling HTTP par un canal **WebSocket** (Flask-SocketIO) ou **Server-Sent Events (SSE)** pour propager instantanément les alertes au tableau de bord.
-* Passerelle Webhook & notifications push automatiques vers les patrouilles de terrain (canaux sécurisés Telegram, SMS ou radio numérique de police).
-
-### 6. 🐳 Déploiement Edge & Containerisation (Docker / Jetson)
-* Création d'un `Dockerfile` multi-stage et d'un `docker-compose.yml` préconfigurés avec support matériel NVIDIA CUDA.
-* Export et quantification des modèles en **TensorRT** (FP16 / INT8) ou **ONNX Runtime** pour déploiement embarqué direct sur boîtiers compacts de bord de route (**NVIDIA Jetson Orin Nano / AGX**).
+1. **Persistent Multi-Object Tracking (ByteTrack / BoT-SORT)**:
+   Assign persistent track IDs to vehicles across frames to prevent duplicate citations for the same vehicle.
+2. **Relational Database & Citation History (PostgreSQL / SQLite)**:
+   Persist all detections, audit statuses, and officer verification notes via an ORM.
+3. **Certified Legal PDF Dossier Generation (ReportLab)**:
+   Export tamper-evident A4 PDF citations with official municipal seals, GPS coordinates, cropped evidence photos, and dynamic QR payment codes.
+4. **Additional Traffic Violations**:
+   Red-light running via virtual polygon triggers, wrong-way driving detection, and phone-distracted driving via human pose estimation (YOLO-Pose / MediaPipe).
+5. **Edge Deployment & Hardware Acceleration**:
+   Quantization into **TensorRT (FP16/INT8)** and containerization for **NVIDIA Jetson Orin Nano / AGX** smart roadside appliances.
 
 ---
 
-## 📜 Licence & Copyright
+## 📜 License & Author Attribution
 
-Ce projet est distribué sous les termes de la licence open-source **MIT**. Consultez le fichier [LICENSE](LICENSE) pour plus de détails.
+Distributed under the open-source **MIT License**. See [LICENSE](LICENSE) for details.
 
 ```text
-© 2026 SafeCityAI - Système Autonome de Détection et Sécurité Routière / Autonomous Road Safety & Traffic Enforcement System.
-Tous droits réservés / All rights reserved.
+© 2026 SafeCityAI - Autonomous Road Safety & AI Traffic Enforcement Platform.
+All rights reserved.
 
-Auteur & Développeur / Developer : ratovoarisoaricardo (Ratovoarisoa Mendrika Manjaka Ricardo)
-Projet Vision par Ordinateur / Computer Vision Engineering Minor Project.
-Architecture Double-Modèle YOLOv5 (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR.
+Author & Developer: ratovoarisoaricardo (Ratovoarisoa Mendrika Manjaka Ricardo)
+Computer Vision & Edge AI Engineering Project.
+Dual-Model YOLOv5 Architecture (best_image.pt 🔒 & best_cctv.pt) + Local ALPR EasyOCR.
 ```
 
 <div align="center">
-  <sub>Développé avec passion pour sauver des vies et moderniser la sécurité routière 🛵🚦🛡️</sub>
+  <sub>Engineered with passion to modernize road safety and save lives worldwide 🛵🚦🛡️</sub>
 </div>
