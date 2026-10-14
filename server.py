@@ -14,13 +14,24 @@ import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify, render_template, send_from_directory, Response
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
+app = Flask(
+    __name__,
+    static_folder=STATIC_DIR,
+    static_url_path='/static',
+    template_folder=TEMPLATES_DIR
+)
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(STATIC_DIR, filename)
 
 # Initialisation des moteurs neuronaux
 from model_engine import detector, image_detector, cctv_detector
 from alpr_ocr import alpr_engine, REGIONAL_PROFILES
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ------------------------------------------------------------------------------
 # 1. Moteur de Caméra Asynchrone (Zero-Lag 30 FPS CCTV Engine)
