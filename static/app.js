@@ -1044,6 +1044,26 @@ Dossier Status : Ready for submission
         });
     }
 
+    // Sélecteur de source vidéo CCTV (Caméras multiples HD)
+    const cctvSourceSelect = document.getElementById('cctvSourceSelect');
+    if (cctvSourceSelect) {
+        cctvSourceSelect.addEventListener('change', (e) => {
+            const selectedVideo = e.target.value;
+            fetch('/api/set_cctv_video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ video: selectedVideo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && isRealStreamActive && cctvLiveStream) {
+                    cctvLiveStream.src = '/video/live_feed?t=' + Date.now();
+                }
+            })
+            .catch(err => console.error("Erreur bascule source vidéo CCTV:", err));
+        });
+    }
+
     // FONCTIONNALITÉ CLÉ : Capture de la frame CCTV vers le Mode Analyse Image
     if (cctvSnapshotBtn) {
         cctvSnapshotBtn.addEventListener('click', () => {

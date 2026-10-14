@@ -50,17 +50,17 @@ class AsyncVideoCamera:
     def _resolve_video_path(self, region):
         reg = region.upper()
         if reg == 'FR':
-            candidates = ['real_traffic_cars.mp4', 'output_violation_demo.mp4', 'input_traffic.mp4']
+            candidates = ['cctv_traffic_hd.mp4', 'real_traffic_cars.mp4', 'output_violation_demo.mp4']
         elif reg == 'VN':
-            candidates = ['saigon_part.webm', 'traffic_d7.webm', 'input_traffic.mp4']
+            candidates = ['saigon_part.webm', 'traffic_d7.webm', 'cctv_traffic_hd.mp4']
         else:
-            candidates = ['input_traffic.mp4', 'real_helmet_traffic.mp4', 'output_violation_demo.mp4']
+            candidates = ['cctv_traffic_hd.mp4', 'output_violation_demo.mp4', 'input_traffic.mp4']
 
         for fname in candidates:
             p = os.path.join(BASE_DIR, fname)
-            if os.path.exists(p) and os.path.getsize(p) > 1000:
+            if os.path.exists(p) and os.path.getsize(p) > 10000:
                 return p
-        return os.path.join(BASE_DIR, 'input_traffic.mp4')
+        return os.path.join(BASE_DIR, 'cctv_traffic_hd.mp4')
 
     def start(self):
         if not self.running:
@@ -75,6 +75,15 @@ class AsyncVideoCamera:
             if new_path != self.video_path and os.path.exists(new_path):
                 self.video_path = new_path
                 print(f" [CCTV] Source vidéo mise à jour pour la région {self.region} : {os.path.basename(new_path)}")
+
+    def set_video_file(self, filename):
+        with self.lock:
+            p = os.path.join(BASE_DIR, filename)
+            if os.path.exists(p) and os.path.getsize(p) > 1000:
+                self.video_path = p
+                print(f" [CCTV] Source vidéo changée manuellement : {filename}")
+                return True
+        return False
 
     def get_frame_bytes(self):
         with self.lock:
@@ -265,6 +274,18 @@ def set_region():
         "success": True,
         "region": region,
         "profile": REGIONAL_PROFILES.get(region if region != 'AUTO' else 'IN')
+    })
+
+@app.route('/api/set_cctv_video', methods=['POST'])
+def set_cctv_video():
+    """Permet de basculer la vidéo source CCTV ('cctv_traffic_hd.mp4', 'saigon_part.webm', etc.)."""
+    data = request.get_json(silent=True) or {}
+    video_file = data.get('video', 'cctv_traffic_hd.mp4')
+    success = camera.set_video_file(video_file)
+    return jsonify({
+        "success": success,
+        "video": os.path.basename(camera.video_path),
+        "fps": round(camera.current_fps, 1)
     })
 
 # ------------------------------------------------------------------------------

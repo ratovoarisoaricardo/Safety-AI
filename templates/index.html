@@ -336,6 +336,15 @@
                                 <button class="btn btn-primary" id="cctvPlayBtn" data-i18n="cctv_btn_pause">⏸️ Pause Flux</button>
                                 <button class="btn btn-secondary" id="cctvModeBtn" data-i18n="cctv_btn_sim">🎨 Mode Simulateur 2D</button>
                                 <button class="btn btn-secondary" id="cctvSnapshotBtn" data-i18n="cctv_btn_capture">📸 Capturer la Frame pour Scan Immédiat</button>
+                                
+                                <div class="cctv-source-selector">
+                                    <label for="cctvSourceSelect" class="cctv-source-label">📹 Caméra :</label>
+                                    <select id="cctvSourceSelect" class="cctv-source-dropdown" title="Choisir la source vidéo CCTV">
+                                        <option value="cctv_traffic_hd.mp4" selected>🎥 CAM-02 HD : Carrefour Urbain (Plaques Nettes & Infractions)</option>
+                                        <option value="saigon_part.webm">🎥 CAM-03 : Pont Urbain 1080p (Circulation Dense)</option>
+                                        <option value="real_traffic_cars.mp4">🎥 CAM-04 : Autoroute Voie Rapide</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="toolbar-right">
                                 <a href="/video/demo" target="_blank" class="btn btn-secondary" data-i18n="cctv_btn_demo">
