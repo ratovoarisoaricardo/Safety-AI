@@ -656,18 +656,50 @@ document.addEventListener('DOMContentLoaded', () => {
         renderEvidenceCrops(data);
 
         // 5. Mise à jour du Cartouche ALPR de Plaque
-        if (plateCountryStrip) {
-            plateCountryStrip.textContent = `${flag} ${regCode}`;
-        }
+        const hasRealPlate = Boolean(
+            detectedPlate && 
+            detectedPlate !== 'NON_LISIBLE' && 
+            detectedPlate !== 'PLAQUE NON LISIBLE' && 
+            detectedPlate !== 'PLATE NOT VISIBLE' &&
+            detectedPlate !== 'AUCUNE PLAQUE' &&
+            detectedPlate !== '--' &&
+            v.has_plate !== false
+        );
 
-        if (detectedPlate && detectedPlate !== 'NON_LISIBLE' && detectedPlate !== 'PLAQUE NON LISIBLE') {
-            plateTextVal.textContent = detectedPlate;
-            rPlateStatus.textContent = isFr 
-                ? `${detectedPlate} (${flag} ${regName} - Validé ALPR)`
-                : `${detectedPlate} (${flag} ${regName} - ALPR Certified)`;
+        if (hasRealPlate) {
+            if (plateCountryStrip) plateCountryStrip.textContent = `${flag} ${regCode}`;
+            if (plateTextVal) {
+                plateTextVal.textContent = detectedPlate;
+                plateTextVal.style.color = "#ffffff";
+            }
+            if (plateOcrStatus) {
+                plateOcrStatus.textContent = isFr ? "✅ Caractères Validés" : "✅ Characters Validated";
+                plateOcrStatus.className = "plate-ocr-status text-emerald";
+            }
+            if (plateSubtext) {
+                plateSubtext.textContent = isFr ? "Prêt pour transmission au fichier national des véhicules" : "Ready for submission to national vehicle registry";
+            }
+            if (rPlateStatus) {
+                rPlateStatus.textContent = isFr 
+                    ? `${detectedPlate} (${flag} ${regName} - Validé ALPR)`
+                    : `${detectedPlate} (${flag} ${regName} - ALPR Certified)`;
+            }
         } else {
-            plateTextVal.textContent = isFr ? "PLAQUE NON VISIBLE" : "PLATE NOT VISIBLE";
-            rPlateStatus.textContent = isFr ? "Masquée, basse résolution ou angle défavorable" : "Obscured, low-res or unfavorable viewing angle";
+            if (plateCountryStrip) plateCountryStrip.textContent = "⚪ --";
+            if (plateTextVal) {
+                plateTextVal.textContent = isFr ? "AUCUNE PLAQUE DÉTECTÉE" : "NO PLATE DETECTED";
+                plateTextVal.style.color = "#94a3b8";
+            }
+            if (plateOcrStatus) {
+                plateOcrStatus.textContent = isFr ? "⚪ Non Détectée" : "⚪ Not Detected";
+                plateOcrStatus.className = "plate-ocr-status text-muted";
+            }
+            if (plateSubtext) {
+                plateSubtext.textContent = isFr ? "Aucune plaque minéralogique lisible sur ce cliché" : "No legible license plate identified in this snapshot";
+            }
+            if (rPlateStatus) {
+                rPlateStatus.textContent = isFr ? "Non détectée sur cette prise de vue" : "Not detected in this viewpoint";
+            }
         }
 
         // 6. Mise à jour du Procès-Verbal / Rapport Opérationnel & Cadre Juridique
@@ -794,7 +826,8 @@ document.addEventListener('DOMContentLoaded', () => {
         evidenceCardsContainer.innerHTML = '';
 
         if (!currentDetections || currentDetections.length === 0) {
-            evidenceCardsContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem;">Aucune preuve isolée disponible.</p>`;
+            const isFr = (currentLang === 'fr');
+            evidenceCardsContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">${isFr ? "Aucune preuve isolée disponible sur ce cliché." : "No isolated visual evidence available for this snapshot."}</p>`;
             return;
         }
 
@@ -1034,6 +1067,7 @@ Dossier Status : Ready for submission
             if (isRealStreamActive) {
                 cctvSimCanvas.classList.add('hidden');
                 cctvLiveStream.classList.remove('hidden');
+                if (cctvAlert) cctvAlert.classList.add('hidden');
                 cctvLiveStream.src = '/video/live_feed?t=' + Date.now();
                 cctvModeBtn.textContent = isFr ? '🎨 Mode Simulateur 2D' : '🎨 2D Simulator Mode';
             } else {
@@ -1068,6 +1102,9 @@ Dossier Status : Ready for submission
                 selectedVideo = userUrl.trim();
             }
 
+            // Cacher immédiatement la barre d'alerte lors du changement de source
+            if (cctvAlert) cctvAlert.classList.add('hidden');
+
             // Mise à jour visuelle immédiate des libellés du moniteur
             if (cctvCamTitle) {
                 if (selectedVideo === '0') {
@@ -1080,6 +1117,60 @@ Dossier Status : Ready for submission
                     cctvCamTitle.textContent = isFr ? "CAM-03 : Surveillance Voitures Autoroute" : "CAM-03: Highway Car Surveillance";
                 } else {
                     cctvCamTitle.textContent = `📹 Flux Caméra : ${selectedVideo}`;
+                }
+            }
+
+            // Mise à jour contextuelle du flux d'événements à droite du moniteur
+            const cctvEventsStream = document.getElementById('cctvEventsStream');
+            const liveEventCount = document.getElementById('liveEventCount');
+            if (cctvEventsStream) {
+                if (selectedVideo.includes('cars')) {
+                    if (liveEventCount) liveEventCount.textContent = isFr ? "Flux Autoroute" : "Highway Stream";
+                    cctvEventsStream.innerHTML = `
+                        <div class="event-entry compliant">
+                            <div class="event-time">${new Date().toLocaleTimeString('fr-FR')}</div>
+                            <div class="event-data">
+                                <div class="event-title text-emerald">${isFr ? "Voie Rapide : Circulation Fluide Conforme" : "Highway Lane: Compliant Fluid Traffic"}</div>
+                                <div class="event-details">${isFr ? "Interdistance respectée • Vitesse stabilisée" : "Safe distance verified • Regulated speed"}</div>
+                            </div>
+                        </div>
+                        <div class="event-entry compliant">
+                            <div class="event-time">${new Date(Date.now() - 25000).toLocaleTimeString('fr-FR')}</div>
+                            <div class="event-data">
+                                <div class="event-title text-emerald">${isFr ? "Véhicule Léger : Gabarit Réglementaire" : "Light Vehicle: Regulated Profile"}</div>
+                                <div class="event-details">${isFr ? "Secteur autoroutier sous surveillance continue" : "Highway sector under continuous surveillance"}</div>
+                            </div>
+                        </div>
+                    `;
+                } else if (selectedVideo === '0') {
+                    if (liveEventCount) liveEventCount.textContent = isFr ? "Capteur Local" : "Local Sensor";
+                    cctvEventsStream.innerHTML = `
+                        <div class="event-entry compliant">
+                            <div class="event-time">${new Date().toLocaleTimeString('fr-FR')}</div>
+                            <div class="event-data">
+                                <div class="event-title text-cyan">${isFr ? "Webcam PC Connectée en Direct" : "Local PC Webcam Connected Live"}</div>
+                                <div class="event-details">${isFr ? "Capteur prêt : Présentez un casque ou une plaque devant la caméra" : "Sensor ready: Hold a helmet or plate in front of the camera"}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    if (liveEventCount) liveEventCount.textContent = isFr ? "Trafic Motos" : "Motorcycle Traffic";
+                    cctvEventsStream.innerHTML = `
+                        <div class="event-entry compliant">
+                            <div class="event-time">20:45:12</div>
+                            <div class="event-data">
+                                <div class="event-title text-emerald">${isFr ? "Conforme : Port du Casque Validé" : "Compliant: Approved Helmet Verified"}</div>
+                                <div class="event-details"><span>${isFr ? "Plaque" : "Plate"}</span> : <span class="font-mono">66-K1 0315</span> • <span>${isFr ? "Confiance" : "Confidence"}</span> : 94%</div>
+                            </div>
+                        </div>
+                        <div class="event-entry compliant">
+                            <div class="event-time">20:44:50</div>
+                            <div class="event-data">
+                                <div class="event-title text-emerald">${isFr ? "Conforme : Port du Casque Validé" : "Compliant: Approved Helmet Verified"}</div>
+                                <div class="event-details"><span>${isFr ? "Plaque" : "Plate"}</span> : <span class="font-mono">59-F1 350.97</span> • <span>${isFr ? "Confiance" : "Confidence"}</span> : 96%</div>
+                            </div>
+                        </div>
+                    `;
                 }
             }
 

@@ -212,13 +212,13 @@
                             <div class="plate-card-left">
                                 <span class="plate-label" data-i18n="plate_label">Plaque d'Immatriculation Extraite (ALPR OCR) :</span>
                                 <div class="plate-badge-metal" id="plateBadgeMetal">
-                                    <span class="plate-country-strip" id="plateCountryStrip">🇮🇳 IND</span>
-                                    <span class="plate-text-val" id="plateTextVal">TN 09 BJ 4054</span>
+                                    <span class="plate-country-strip" id="plateCountryStrip">--</span>
+                                    <span class="plate-text-val" id="plateTextVal" style="color: #94a3b8;">--</span>
                                 </div>
                             </div>
                             <div class="plate-card-right">
-                                <span class="plate-ocr-status" data-i18n="plate_status_ok">✅ Caractères Validés</span>
-                                <span class="plate-subtext" data-i18n="plate_subtext">Prêt pour transmission au fichier national des véhicules</span>
+                                <span class="plate-ocr-status text-muted" id="plateOcrStatus" data-i18n="plate_status_ok">⚪ En attente de scan</span>
+                                <span class="plate-subtext" id="plateSubtext" data-i18n="plate_subtext">Prêt pour transmission au fichier national des véhicules</span>
                             </div>
                         </div>
 
@@ -231,27 +231,27 @@
                             <div class="summary-content" id="reportSummaryContent">
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_legal_label">Constat Légal :</span>
-                                    <span class="r-value text-red" id="rLegalStatus">Infraction caractérisée au Code de la Route</span>
+                                    <span class="r-value text-muted" id="rLegalStatus">⚪ En attente de scan ou capture vidéo</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_jurisdiction_label">Cadre Juridique :</span>
-                                    <span class="r-value text-amber" id="rJurisdiction">Section 129, Indian Motor Vehicles Act</span>
+                                    <span class="r-value text-muted" id="rJurisdiction">--</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_penalty_label">Sanction Prévue :</span>
-                                    <span class="r-value text-red" id="rPenalty">Amende forfaitaire de ₹1,000 INR + suspension 3 mois</span>
+                                    <span class="r-value text-muted" id="rPenalty">--</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_equip_label">Équipement constaté :</span>
-                                    <span class="r-value" id="rEquipStatus">Absence de casque de protection sur motocycliste identifié</span>
+                                    <span class="r-value text-muted" id="rEquipStatus">--</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_plate_label">Immatriculation :</span>
-                                    <span class="r-value font-mono" id="rPlateStatus">TN 09 BJ 4054 (Confirmé par reconnaissance ALPR)</span>
+                                    <span class="r-value font-mono text-muted" id="rPlateStatus">--</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_action_label">Action Système :</span>
-                                    <span class="r-value text-cyan" id="rActionStatus">Dossier de preuve électronique assemblé et prêt pour verbalisation</span>
+                                    <span class="r-value text-cyan" id="rActionStatus">Système prêt - Sélectionnez un échantillon ou capturez une caméra</span>
                                 </div>
                             </div>
 
@@ -322,8 +322,8 @@
                             <img id="cctvLiveStream" src="/video/live_feed" alt="Flux Vidéo Motos en Direct" class="cctv-video-element">
                             <canvas id="cctvSimCanvas" width="640" height="360" class="cctv-sim-element hidden"></canvas>
                             
-                            <div class="cctv-hud-top-left" id="cctvHudLocation" data-i18n="cctv_hud_location">CAM-01 CARREFOUR PRINCIPAL [TRAFIC REEL 1080p]</div>
-                            <div class="cctv-hud-top-right" id="cctvTime">11/10/2026 20:45:00</div>
+                            <div class="cctv-hud-top-left hidden" id="cctvHudLocation" data-i18n="cctv_hud_location">CAM-01 CARREFOUR PRINCIPAL [TRAFIC REEL 1080p]</div>
+                            <div class="cctv-hud-top-right hidden" id="cctvTime">11/10/2026 20:45:00</div>
                             <div class="cctv-hud-crosshair"></div>
                             
                             <div class="cctv-alert-bar hidden" id="cctvAlert">

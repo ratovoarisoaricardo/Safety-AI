@@ -80,6 +80,8 @@ class AsyncVideoCamera:
 
     def set_video_file(self, filename):
         with self.lock:
+            self.cached_detections = []
+            self.violation_detected = False
             s = str(filename).strip()
             # 1. Mode Caméra Physique / Webcam locale directe
             if s in ("0", "webcam", "live_cam", "cam_0"):
@@ -149,6 +151,8 @@ class AsyncVideoCamera:
                     except Exception:
                         pass
                 current_opened_source = target_source
+                self.cached_detections = []
+                self.violation_detected = False
                 if is_webcam:
                     cap = cv2.VideoCapture(0)
                 else:
@@ -183,7 +187,7 @@ class AsyncVideoCamera:
                 try:
                     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     pil_img = Image.fromarray(rgb_frame)
-                    all_dets = cctv_detector.detect_image(pil_img, conf_thres=0.20)
+                    all_dets = cctv_detector.detect_image(pil_img, conf_thres=0.35)
                     self.cached_detections = [d for d in all_dets if d['class'] in MOTO_TARGET_CLASSES]
                 except Exception:
                     pass
@@ -215,9 +219,8 @@ class AsyncVideoCamera:
                 cv2.rectangle(frame, (bx, max(0, by - th - 6)), (bx + tw + 6, by), color, -1)
                 cv2.putText(frame, tag, (bx + 3, max(12, by - 4)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1)
 
-            # Incrustation télémétrique cybernétique HUD
+            # Incrustation télémétrique cybernétique HUD dans le flux
             t_str = time.strftime("%d/%m/%Y %H:%M:%S")
-            reg_label = REGIONAL_PROFILES.get(self.region, REGIONAL_PROFILES.get('IN', {}))['name']
             if is_webcam:
                 cam_label = "DIRECT WEBCAM PHYSIQUE [CAPTEUR REEL EN DIRECT]"
             elif 'saigon' in str(target_source).lower():
@@ -229,16 +232,16 @@ class AsyncVideoCamera:
             else:
                 cam_label = f"CCTV [{os.path.basename(str(target_source))}]"
 
-            cv2.putText(frame, f"{cam_label} | {reg_label.upper()} | {t_str}", (15, 25), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 240, 255), 2)
+            cv2.putText(frame, f"{cam_label} | {t_str}", (15, 25), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 240, 255), 2)
 
             fps_display = min(self.current_fps, 30.0)
-            status_text = f"IA ENGINE : best_cctv.pt | {fps_display:.1f} FPS REEL"
-            cv2.putText(frame, status_text, (15, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+            status_text = f"IA ENGINE : best_cctv.pt | {fps_display:.1f} FPS"
+            cv2.putText(frame, status_text, (15, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 255, 0), 2)
 
             if violation_found:
-                cv2.putText(frame, "ALERTE EN DIRECT : CONDUCTEUR SANS CASQUE DETECTE", (15, 75), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.50, (0, 0, 255), 2)
+                cv2.putText(frame, "ALERTE EN DIRECT : INFRACTION MOTARD DETECTEE", (15, 72), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 0, 255), 2)
 
             # Encodage JPEG en mémoire vive
             ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
@@ -416,15 +419,23 @@ def detect():
         plates = [d for d in detections if d.get('target_type') == 'plate' or 'plate' in d['class'].lower()]
 
         # Détermination de la région applicable
-        if detected_plate_info:
+        if detected_plate_info and detected_plate_info.get('region'):
             active_region = detected_plate_info['region']
         elif requested_region != 'AUTO':
             active_region = requested_region
         else:
-            active_region = 'IN'  # Défaut cohérent pour motards sans plaque nette
+            active_region = 'AUTO'
 
-        reg_prof = REGIONAL_PROFILES.get(active_region, REGIONAL_PROFILES['IN'])
-        detected_plate_text = detected_plate_info['text'] if detected_plate_info else reg_prof['default_plate']
+        target_reg = active_region if active_region in REGIONAL_PROFILES else 'GLOBAL'
+        reg_prof = REGIONAL_PROFILES.get(target_reg, REGIONAL_PROFILES['GLOBAL'])
+
+        # Détermination stricte de la plaque : Ne JAMAIS inventer une fausse plaque !
+        if detected_plate_info and detected_plate_info.get('text') not in ("PLAQUE NON VISIBLE", "PLAQUE NON LISIBLE", None):
+            detected_plate_text = detected_plate_info['text']
+            has_plate = True
+        else:
+            detected_plate_text = None
+            has_plate = False
 
         has_violation = len(violations) > 0
         is_compliant = len(helmets) > 0 and not has_violation
@@ -438,6 +449,7 @@ def detect():
                 "color": "#ef4444",
                 "confidence": round(max_conf, 3),
                 "plate": detected_plate_text,
+                "has_plate": has_plate,
                 "region": active_region,
                 "region_name": reg_prof['name'],
                 "flag": reg_prof['flag'],
@@ -458,6 +470,7 @@ def detect():
                 "color": "#10b981",
                 "confidence": round(max_conf, 3),
                 "plate": detected_plate_text,
+                "has_plate": has_plate,
                 "region": active_region,
                 "region_name": reg_prof['name'],
                 "flag": reg_prof['flag'],
@@ -472,11 +485,12 @@ def detect():
         else:
             verdict = {
                 "status": "OBSERVATION",
-                "label": f"CONTRÔLE ROUTIER : USAGER EN CIRCULATION ({reg_prof['flag']} {reg_prof['name']})",
+                "label": f"SURVEILLANCE ROUTIÈRE : SCÈNE SOUS CONTRÔLE ({reg_prof['flag']} {reg_prof['name']})",
                 "severity": "INFORMATIF",
                 "color": "#00f0ff",
                 "confidence": 0.88,
                 "plate": detected_plate_text,
+                "has_plate": has_plate,
                 "region": active_region,
                 "region_name": reg_prof['name'],
                 "flag": reg_prof['flag'],
@@ -521,6 +535,7 @@ def status():
         "cctv_fps": round(camera.current_fps, 1),
         "cctv_video": os.path.basename(camera.video_path),
         "cctv_region": camera.region,
+        "cctv_violation": camera.violation_detected,
         "backup_secured": os.path.exists(os.path.join(BASE_DIR, 'weights', 'best_image_backup.pt')),
         "device": str(image_detector.device) if image_detector.loaded else 'none',
         "classes": image_detector.class_names if image_detector.loaded else {}
