@@ -1046,11 +1046,43 @@ Dossier Status : Ready for submission
         });
     }
 
-    // Sélecteur de source vidéo CCTV (Caméras multiples HD)
+    // Sélecteur de source vidéo CCTV (Caméras multiples HD & Webcam Directe)
     const cctvSourceSelect = document.getElementById('cctvSourceSelect');
+    const cctvCamTitle = document.getElementById('cctvCamTitle');
+    const cctvHudLocation = document.getElementById('cctvHudLocation');
+
     if (cctvSourceSelect) {
         cctvSourceSelect.addEventListener('change', (e) => {
-            const selectedVideo = e.target.value;
+            let selectedVideo = e.target.value;
+            const isFr = (currentLang === 'fr');
+
+            if (selectedVideo === 'custom_url') {
+                const promptMsg = isFr 
+                    ? "Entrez l'adresse du flux vidéo (RTSP ou HTTP) de la caméra de circulation :\nExemple: rtsp://192.168.1.100:554/live ou http://flux-camera/stream.mjpg"
+                    : "Enter traffic camera stream URL (RTSP or HTTP):\nExample: rtsp://192.168.1.100:554/live or http://cam-feed/stream.mjpg";
+                const userUrl = prompt(promptMsg, "rtsp://");
+                if (!userUrl || userUrl.trim() === "" || userUrl.trim() === "rtsp://") {
+                    cctvSourceSelect.value = "saigon_part.webm";
+                    return;
+                }
+                selectedVideo = userUrl.trim();
+            }
+
+            // Mise à jour visuelle immédiate des libellés du moniteur
+            if (cctvCamTitle) {
+                if (selectedVideo === '0') {
+                    cctvCamTitle.textContent = isFr ? "🔴 DIRECT : Caméra Physique en Direct (Webcam PC)" : "🔴 LIVE : Physical PC Webcam in Direct Feed";
+                } else if (selectedVideo.includes('saigon')) {
+                    cctvCamTitle.textContent = isFr ? "CAM-01 : Surveillance Carrefour Urbain (Trafic Réel 1080p)" : "CAM-01: Urban Intersection Surveillance (Real 1080p)";
+                } else if (selectedVideo.includes('motorcycle_real')) {
+                    cctvCamTitle.textContent = isFr ? "CAM-02 : Voie de Circulation Réelle (Motos en Mouvement)" : "CAM-02: Real Motorcycle Traffic Lane";
+                } else if (selectedVideo.includes('cars')) {
+                    cctvCamTitle.textContent = isFr ? "CAM-03 : Surveillance Voitures Autoroute" : "CAM-03: Highway Car Surveillance";
+                } else {
+                    cctvCamTitle.textContent = `📹 Flux Caméra : ${selectedVideo}`;
+                }
+            }
+
             fetch('/api/set_cctv_video', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

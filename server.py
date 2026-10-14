@@ -50,17 +50,17 @@ class AsyncVideoCamera:
     def _resolve_video_path(self, region):
         reg = region.upper()
         if reg == 'FR':
-            candidates = ['cctv_traffic_hd.mp4', 'real_traffic_cars.mp4', 'output_violation_demo.mp4']
+            candidates = ['real_traffic_cars.mp4', 'saigon_part.webm', 'cctv_motorcycle_real.webm', 'output_violation_demo.mp4']
         elif reg == 'VN':
-            candidates = ['saigon_part.webm', 'traffic_d7.webm', 'cctv_traffic_hd.mp4']
+            candidates = ['saigon_part.webm', 'traffic_d7.webm', 'cctv_motorcycle_real.webm']
         else:
-            candidates = ['cctv_traffic_hd.mp4', 'output_violation_demo.mp4', 'input_traffic.mp4']
+            candidates = ['saigon_part.webm', 'cctv_motorcycle_real.webm', 'real_traffic_cars.mp4', 'traffic_d7.webm', 'output_violation_demo.mp4']
 
         for fname in candidates:
             p = os.path.join(BASE_DIR, fname)
             if os.path.exists(p) and os.path.getsize(p) > 10000:
                 return p
-        return os.path.join(BASE_DIR, 'cctv_traffic_hd.mp4')
+        return os.path.join(BASE_DIR, 'saigon_part.webm')
 
     def start(self):
         if not self.running:
@@ -71,13 +71,27 @@ class AsyncVideoCamera:
     def set_region(self, region):
         with self.lock:
             self.region = region.upper()
-            new_path = self._resolve_video_path(self.region)
-            if new_path != self.video_path and os.path.exists(new_path):
-                self.video_path = new_path
-                print(f" [CCTV] Source vidéo mise à jour pour la région {self.region} : {os.path.basename(new_path)}")
+            # Ne pas écraser si l'utilisateur a choisi la webcam directe '0' ou une URL RTSP
+            if str(self.video_path) != "0" and not str(self.video_path).startswith(('rtsp://', 'http://', 'https://')):
+                new_path = self._resolve_video_path(self.region)
+                if new_path != self.video_path and os.path.exists(new_path):
+                    self.video_path = new_path
+                    print(f" [CCTV] Source vidéo mise à jour pour la région {self.region} : {os.path.basename(new_path)}")
 
     def set_video_file(self, filename):
         with self.lock:
+            s = str(filename).strip()
+            # 1. Mode Caméra Physique / Webcam locale directe
+            if s in ("0", "webcam", "live_cam", "cam_0"):
+                self.video_path = "0"
+                print(" [CCTV] Source changée : Caméra Physique Directe (Webcam 0)")
+                return True
+            # 2. Flux Réseau IP / RTSP / HTTP
+            if s.startswith(("http://", "https://", "rtsp://")):
+                self.video_path = s
+                print(f" [CCTV] Source changée : Flux Réseau Caméra IP ({s})")
+                return True
+            # 3. Fichier vidéo local authentique
             p = os.path.join(BASE_DIR, filename)
             if os.path.exists(p) and os.path.getsize(p) > 1000:
                 self.video_path = p
@@ -116,22 +130,42 @@ class AsyncVideoCamera:
         MOTO_TARGET_CLASSES = {'Rider', 'rider', 'Helmet', 'with helmet', 'No_Helmet', 'without helmet', 'License_Plate', 'number plate'}
 
         cap = None
+        current_opened_source = None
         while self.running:
-            target_path = self.video_path
-            if not os.path.exists(target_path):
-                time.sleep(0.5)
-                continue
+            target_source = self.video_path
+            is_webcam = str(target_source).strip() in ("0", "webcam", "live_cam", "cam_0")
+            is_url = isinstance(target_source, str) and (target_source.startswith("http://") or target_source.startswith("https://") or target_source.startswith("rtsp://"))
 
-            if cap is None or not cap.isOpened():
-                cap = cv2.VideoCapture(target_path)
+            if not is_webcam and not is_url:
+                if not os.path.exists(target_source):
+                    time.sleep(0.5)
+                    continue
+
+            # Réouverture automatique si la source a changé ou si cap n'est pas ouvert
+            if cap is None or not cap.isOpened() or current_opened_source != target_source:
+                if cap is not None:
+                    try:
+                        cap.release()
+                    except Exception:
+                        pass
+                current_opened_source = target_source
+                if is_webcam:
+                    cap = cv2.VideoCapture(0)
+                else:
+                    cap = cv2.VideoCapture(target_source)
 
             ret, frame = cap.read()
             if not ret:
-                # Bouclage sécurisé et propre du fichier vidéo sans blocage OpenCV
-                cap.release()
-                time.sleep(0.02)
-                cap = cv2.VideoCapture(target_path)
-                continue
+                if is_webcam:
+                    # Pour la webcam physique, si une frame tarde, attendre brièvement
+                    time.sleep(0.05)
+                    continue
+                else:
+                    # Bouclage sécurisé et propre du fichier vidéo sans blocage OpenCV
+                    cap.release()
+                    time.sleep(0.02)
+                    cap = cv2.VideoCapture(target_source)
+                    continue
 
             self.frame_count += 1
             now = time.time()
@@ -183,9 +217,20 @@ class AsyncVideoCamera:
 
             # Incrustation télémétrique cybernétique HUD
             t_str = time.strftime("%d/%m/%Y %H:%M:%S")
-            reg_label = REGIONAL_PROFILES.get(self.region, REGIONAL_PROFILES['IN'])['name']
-            cv2.putText(frame, f"CAM-02 CCTV [SECTEUR : {reg_label.upper()}] | {t_str}", (15, 25), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 240, 255), 2)
+            reg_label = REGIONAL_PROFILES.get(self.region, REGIONAL_PROFILES.get('IN', {}))['name']
+            if is_webcam:
+                cam_label = "DIRECT WEBCAM PHYSIQUE [CAPTEUR REEL EN DIRECT]"
+            elif 'saigon' in str(target_source).lower():
+                cam_label = "CAM-01 CCTV [CARREFOUR URBAIN REEL 1080p]"
+            elif 'motorcycle_real' in str(target_source).lower():
+                cam_label = "CAM-02 CCTV [VOIE CIRCULATION REELLE 1080p]"
+            elif 'cars' in str(target_source).lower():
+                cam_label = "CAM-03 CCTV [SURVEILLANCE AUTOROUTE]"
+            else:
+                cam_label = f"CCTV [{os.path.basename(str(target_source))}]"
+
+            cv2.putText(frame, f"{cam_label} | {reg_label.upper()} | {t_str}", (15, 25), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 240, 255), 2)
 
             fps_display = min(self.current_fps, 30.0)
             status_text = f"IA ENGINE : best_cctv.pt | {fps_display:.1f} FPS REEL"
@@ -278,13 +323,18 @@ def set_region():
 
 @app.route('/api/set_cctv_video', methods=['POST'])
 def set_cctv_video():
-    """Permet de basculer la vidéo source CCTV ('cctv_traffic_hd.mp4', 'saigon_part.webm', etc.)."""
+    """Permet de basculer la vidéo source CCTV ('0' pour webcam, 'saigon_part.webm', URL RTSP, etc.)."""
     data = request.get_json(silent=True) or {}
-    video_file = data.get('video', 'cctv_traffic_hd.mp4')
+    video_file = data.get('video', 'saigon_part.webm')
     success = camera.set_video_file(video_file)
+    disp_name = "🔴 Caméra PC / Webcam Physique" if str(camera.video_path) == "0" else (
+        f"🌐 Flux Réseau ({camera.video_path})" if str(camera.video_path).startswith(('rtsp://', 'http://', 'https://'))
+        else os.path.basename(str(camera.video_path))
+    )
     return jsonify({
         "success": success,
-        "video": os.path.basename(camera.video_path),
+        "video": disp_name,
+        "source": camera.video_path,
         "fps": round(camera.current_fps, 1)
     })
 

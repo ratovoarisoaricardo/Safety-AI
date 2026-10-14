@@ -308,7 +308,7 @@
                         <div class="cctv-header-bar">
                             <div class="cctv-header-info">
                                 <div class="live-dot-indicator"></div>
-                                <h2 data-i18n="cctv_cam_title">CAM-02 : Surveillance Urbaine Circulation Motos</h2>
+                                <h2 id="cctvCamTitle" data-i18n="cctv_cam_title">CAM-01 : Surveillance Carrefour Urbain (Trafic Réel 1080p)</h2>
                                 <span class="cctv-tag" data-i18n="cctv_tag_filter">Filtre IA : 100% Motos</span>
                             </div>
                             <div class="cctv-status-tags">
@@ -322,7 +322,7 @@
                             <img id="cctvLiveStream" src="/video/live_feed" alt="Flux Vidéo Motos en Direct" class="cctv-video-element">
                             <canvas id="cctvSimCanvas" width="640" height="360" class="cctv-sim-element hidden"></canvas>
                             
-                            <div class="cctv-hud-top-left" data-i18n="cctv_hud_location">CAM-02 CARREFOUR PRINCIPAL [FILTRE MOTOS]</div>
+                            <div class="cctv-hud-top-left" id="cctvHudLocation" data-i18n="cctv_hud_location">CAM-01 CARREFOUR PRINCIPAL [TRAFIC REEL 1080p]</div>
                             <div class="cctv-hud-top-right" id="cctvTime">11/10/2026 20:45:00</div>
                             <div class="cctv-hud-crosshair"></div>
                             
@@ -339,11 +339,13 @@
                                 <button class="btn btn-secondary" id="cctvSnapshotBtn" data-i18n="cctv_btn_capture">📸 Capturer la Frame pour Scan Immédiat</button>
                                 
                                 <div class="cctv-source-selector">
-                                    <label for="cctvSourceSelect" class="cctv-source-label">📹 Caméra :</label>
-                                    <select id="cctvSourceSelect" class="cctv-source-dropdown" title="Choisir la source vidéo CCTV">
-                                        <option value="cctv_traffic_hd.mp4" selected>🎥 CAM-02 HD : Carrefour Urbain (Plaques Nettes & Infractions)</option>
-                                        <option value="saigon_part.webm">🎥 CAM-03 : Pont Urbain 1080p (Circulation Dense)</option>
-                                        <option value="real_traffic_cars.mp4">🎥 CAM-04 : Autoroute Voie Rapide</option>
+                                    <label for="cctvSourceSelect" class="cctv-source-label">📹 Source Vidéo :</label>
+                                    <select id="cctvSourceSelect" class="cctv-source-dropdown" title="Choisir la source vidéo ou caméra CCTV">
+                                        <option value="saigon_part.webm" selected>📹 CAM-01 : Carrefour Urbain 1080p (Trafic Réel 100% Motos)</option>
+                                        <option value="0">🔴 DIRECT : Caméra PC / Webcam Physique en Direct</option>
+                                        <option value="cctv_motorcycle_real.webm">📹 CAM-02 : Voie de Circulation Réelle (Motos en Mouvement)</option>
+                                        <option value="real_traffic_cars.mp4">📹 CAM-03 : Surveillance Voitures Autoroute (Flux Réel)</option>
+                                        <option value="custom_url">🌐 Flux Réseau RTSP / Caméra IP en Direct...</option>
                                     </select>
                                 </div>
                             </div>
