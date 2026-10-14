@@ -1,0 +1,28 @@
+# Vercel Deployment Ignore Rules
+# Keep deployment bundle lightweight (<50 MB) and blazing fast
+
+# Video files (CCTV raw footage handled via local server or streaming CDN)
+*.webm
+*.mp4
+
+# Dataset training directories
+datasets/
+dataset/
+runs_cctv/
+scratch_frames/
+
+# Backups & virtual environments
+weights/best_image_backup.pt
+venv/
+.env
+__pycache__/
+*.pyc
+
+# Local scripts & tools
+train_cctv_isolated.py
+extract_cctv_frames.py
+auto_annotate_cctv.py
+ccpd_tool.py
+run_safecity.bat
+run_safety.bat
+zip_dataset.*

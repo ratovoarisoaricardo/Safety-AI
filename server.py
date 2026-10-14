@@ -45,7 +45,8 @@ class AsyncVideoCamera:
         self.last_fps_time = time.time()
         self.current_fps = 30.0
         self.violation_detected = False
-        self.start()
+        if not os.environ.get('VERCEL'):
+            self.start()
 
     def _resolve_video_path(self, region):
         reg = region.upper()
@@ -103,7 +104,15 @@ class AsyncVideoCamera:
 
     def get_frame_bytes(self):
         with self.lock:
-            return self.current_jpeg
+            if self.current_jpeg is not None:
+                return self.current_jpeg
+            # Fallback for serverless environments (Vercel) or initial cold start
+            for fb in ('saigon_frame.jpg', 'sample_traffic_frame.jpg'):
+                p = os.path.join(BASE_DIR, fb)
+                if os.path.exists(p):
+                    with open(p, 'rb') as f:
+                        return f.read()
+            return None
 
     def get_snapshot_png(self):
         with self.lock:
@@ -112,6 +121,14 @@ class AsyncVideoCamera:
                 ret, buf = cv2.imencode('.png', self.current_raw_frame, [cv2.IMWRITE_PNG_COMPRESSION, 3])
                 if ret:
                     return buf.tobytes()
+            # Serverless fallback snapshot
+            fb = os.path.join(BASE_DIR, 'saigon_frame.jpg')
+            if os.path.exists(fb):
+                img = cv2.imread(fb)
+                if img is not None:
+                    ret, buf = cv2.imencode('.png', img, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+                    if ret:
+                        return buf.tobytes()
         return None
 
     def stop(self):
@@ -284,6 +301,10 @@ def live_feed():
     Flux vidéo streaming continu MJPEG ultra-fluide à 30 FPS.
     Distribue les frames directement depuis le tampon mémoire sans bloquer le serveur.
     """
+    if os.environ.get('VERCEL'):
+        frame_bytes = camera.get_frame_bytes()
+        if frame_bytes:
+            return Response(b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n', mimetype='multipart/x-mixed-replace; boundary=frame')
     def stream_generator():
         while True:
             frame_bytes = camera.get_frame_bytes()

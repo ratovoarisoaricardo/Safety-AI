@@ -368,11 +368,17 @@ safecity-ai/
 * **Git** installed ([git-scm.com](https://git-scm.com/)).
 * A modern web browser (Chrome, Edge, Firefox, Brave).
 
-### Option 1: 1-Click Launch (Recommended)
-* **On Windows**: Double-click `run_safecity.bat`.
+### Option 1: 1-Click Launch (Local)
+* **On Windows**: Double-click `run_safety.bat` (or `run_safecity.bat`).
 * **On Linux / macOS**: Run `chmod +x start.sh && ./start.sh`.
 
-### Option 2: Manual Terminal Setup
+### Option 2: Cloud Deployment to Vercel (1-Click)
+The repository is pre-configured with `vercel.json` and a serverless entrypoint in `api/index.py`:
+1. Push your repository to GitHub: [github.com/ratovoarisoaricardo/Safety-AI](https://github.com/ratovoarisoaricardo/Safety-AI.git).
+2. Go to [vercel.com/new](https://vercel.com/new) and click **Import Git Repository**.
+3. Select `Safety-AI` and click **Deploy**. Vercel automatically builds and provides your global live HTTPS URL.
+
+### Option 3: Manual Terminal Setup
 ```bash
 # 1. Clone repository
 git clone https://github.com/ratovoarisoaricardo/Safety-AI.git

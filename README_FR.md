@@ -320,11 +320,17 @@ Les coordonnées des boîtes englobantes suivent le standard normalisé YOLOv5 :
 - **Python 3.10 ou supérieur** installé ([python.org](https://www.python.org/downloads/)).
 - **Git** installé ([git-scm.com](https://git-scm.com/)).
 
-### Option 1 : Lancement Automatique en 1 Clic (Recommandé)
-* **Sous Windows :** Double-cliquez sur `run_safecity.bat`.
+### Option 1 : Lancement Local en 1 Clic
+* **Sous Windows :** Double-cliquez sur `run_safety.bat` (ou `run_safecity.bat`).
 * **Sous Linux / macOS :** `chmod +x start.sh && ./start.sh`.
 
-### Option 2 : Installation Manuelle via Terminal
+### Option 2 : Déploiement Cloud sur Vercel (1 Clic)
+Le projet est prêt pour un déploiement serverless immédiat sur Vercel grâce à `vercel.json` et `api/index.py` :
+1. Poussez vos modifications sur votre dépôt GitHub : [github.com/ratovoarisoaricardo/Safety-AI](https://github.com/ratovoarisoaricardo/Safety-AI.git).
+2. Rendez-vous sur [vercel.com/new](https://vercel.com/new) et cliquez sur **Import Git Repository**.
+3. Sélectionnez le dépôt `Safety-AI` puis cliquez sur **Deploy**. Vercel génère instantanément votre URL publique sécurisée HTTPS en direct.
+
+### Option 3 : Installation Manuelle via Terminal
 ```bash
 # 1. Cloner le projet
 git clone https://github.com/ratovoarisoaricardo/Safety-AI.git

@@ -1,18 +1,15 @@
-# SafeCityAI YOLOv5 Project Dependencies
+# Safety AI Project Dependencies
 
-# Flask server and client test
+# Web Application Framework
 Flask>=2.2.0
+Werkzeug>=2.2.0
 requests>=2.28.0
 
-# Image & Video processing
+# Image & Computer Vision (headless for cloud & serverless compatibility)
 Pillow>=9.0.0
-opencv-python>=4.6.0
 numpy>=1.22.0
+opencv-python-headless>=4.6.0
 
-# Deep learning inference engine (Optional for simulation, required for local YOLOv5)
-# Note: Install appropriate PyTorch distribution matching your CUDA version (see pytorch.org)
-# torch>=1.12.0
-# torchvision>=0.13.0
-
-# Automatic License Plate Recognition (ALPR OCR)
-easyocr>=1.7.0
+# Deep Learning & Optical Character Recognition
+# Note: For full local GPU/CPU neural inference, install PyTorch and EasyOCR:
+# pip install torch torchvision easyocr

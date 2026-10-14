@@ -15,8 +15,30 @@ from PIL import Image
 if os.name == 'nt':
     pathlib.PosixPath = pathlib.WindowsPath
 
-import torch
-import torch.nn as nn
+try:
+    import torch
+    import torch.nn as nn
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    nn = None
+    TORCH_AVAILABLE = False
+
+if nn is None:
+    class DummyModule:
+        def __init__(self, *args, **kwargs): pass
+        def __call__(self, *args, **kwargs): return self
+    class DummyNN:
+        Module = DummyModule
+        Conv2d = DummyModule
+        BatchNorm2d = DummyModule
+        Identity = DummyModule
+        SiLU = DummyModule
+        Sequential = DummyModule
+        MaxPool2d = DummyModule
+        ModuleList = list
+    nn = DummyNN()
+
 import cv2
 
 # ------------------------------------------------------------------------------
@@ -207,9 +229,9 @@ def torch_nms(boxes, scores, iou_threshold=0.45):
 class SafetyDetector:
     def __init__(self, model_path='best.pt'):
         self.model_path = model_path
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if TORCH_AVAILABLE else 'cpu'
         self.model = None
-        self.class_names = {}
+        self.class_names = {0: 'number plate', 1: 'rider', 2: 'with helmet', 3: 'without helmet'}
         self.loaded = False
         
         # Load face cascade for vehicle cabin driver analysis
@@ -224,6 +246,10 @@ class SafetyDetector:
         self.load_model()
 
     def load_model(self):
+        if not TORCH_AVAILABLE:
+            print(" [INFO] PyTorch not installed in cloud runtime. Operating in vision analytics mode.")
+            return False
+
         if not os.path.exists(self.model_path):
             print(f" [WARNING] Model weights file not found at {self.model_path}")
             return False
