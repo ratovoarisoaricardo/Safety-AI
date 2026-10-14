@@ -579,7 +579,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFr = (currentLang === 'fr');
         const flag = v.flag || (currentRegion === 'FR' ? '🇫🇷' : '🇮🇳');
         const regCode = v.region || (currentRegion === 'FR' ? 'FR' : 'IN');
-        const regName = v.region_name || (currentRegion === 'FR' ? 'France' : 'Inde');
+        let regName = v.region_name || (currentRegion === 'FR' ? 'France' : 'Inde');
+        if (!isFr) {
+            if (regName.includes('Convention de Vienne') || regCode === 'GLOBAL') regName = 'International (Vienna Convention)';
+            else if (regName === 'Inde' || regCode === 'IN') regName = 'India (RTO)';
+            else if (regName.includes('Suisse') || regCode === 'CH') regName = 'Switzerland';
+        }
 
         // 1. Tracé des boîtes sur le canvas
         drawBoundingBoxes(data);
@@ -780,20 +785,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const cls = det.class.toLowerCase();
             let color = '#00f0ff';
             let labelText = det.class;
+            const isFr = (currentLang === 'fr');
 
             if (cls.includes('without') || cls.includes('no_helmet')) {
                 color = '#ef4444'; // Red
-                labelText = `SANS CASQUE ${Math.round(det.confidence * 100)}%`;
+                labelText = isFr ? `SANS CASQUE ${Math.round(det.confidence * 100)}%` : `NO HELMET ${Math.round(det.confidence * 100)}%`;
             } else if (cls.includes('with') || cls.includes('helmet')) {
                 color = '#10b981'; // Green
-                labelText = `AVEC CASQUE ${Math.round(det.confidence * 100)}%`;
+                labelText = isFr ? `AVEC CASQUE ${Math.round(det.confidence * 100)}%` : `HELMET ${Math.round(det.confidence * 100)}%`;
             } else if (cls.includes('rider')) {
                 color = '#3b82f6'; // Royal Blue
-                labelText = `MOTARD ${Math.round(det.confidence * 100)}%`;
+                labelText = isFr ? `MOTARD ${Math.round(det.confidence * 100)}%` : `RIDER ${Math.round(det.confidence * 100)}%`;
             } else if (cls.includes('plate') || cls.includes('number')) {
                 color = '#00f0ff'; // Cyan
                 const plateText = det.plate_text || (det.class.match(/\[(.*?)\]/) ? det.class.match(/\[(.*?)\]/)[1] : '');
-                labelText = plateText ? `PLAQUE: [${plateText}]` : `PLAQUE ${Math.round(det.confidence * 100)}%`;
+                labelText = plateText ? (isFr ? `PLAQUE: [${plateText}]` : `PLATE: [${plateText}]`) : (isFr ? `PLAQUE ${Math.round(det.confidence * 100)}%` : `PLATE ${Math.round(det.confidence * 100)}%`);
             }
 
             // Dessin du rectangle avec effet de lueur
@@ -838,6 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDetections.forEach((det, idx) => {
             const [rawX, rawY, rawW, rawH] = det.box;
             const cls = det.class.toLowerCase();
+            const isFr = (currentLang === 'fr');
 
             // Calcul du padding de contexte (15%)
             const padX = Math.round(rawW * 0.15);
@@ -862,26 +869,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             let isViol = false;
             let isComp = false;
-            let label = "Élément Relevé";
+            let label = isFr ? "Élément Relevé" : "Detected Target";
             let tagClass = "tag-plate";
             let tagText = `${Math.round(det.confidence * 100)}%`;
 
             if (cls.includes('without') || cls.includes('no_helmet')) {
                 isViol = true;
-                label = "Tête / Sans Casque";
+                label = isFr ? "Tête / Sans Casque" : "Head / Missing Helmet";
                 tagClass = "tag-no-helmet";
-                tagText = `❌ INFRACTION (${Math.round(det.confidence * 100)}%)`;
+                tagText = isFr ? `❌ INFRACTION (${Math.round(det.confidence * 100)}%)` : `❌ VIOLATION (${Math.round(det.confidence * 100)}%)`;
             } else if (cls.includes('with') || cls.includes('helmet')) {
                 isComp = true;
-                label = "Casque Homologué";
+                label = isFr ? "Casque Homologué" : "Certified Helmet";
                 tagClass = "tag-helmet";
-                tagText = `✅ CONFORME (${Math.round(det.confidence * 100)}%)`;
+                tagText = isFr ? `✅ CONFORME (${Math.round(det.confidence * 100)}%)` : `✅ COMPLIANT (${Math.round(det.confidence * 100)}%)`;
             } else if (cls.includes('rider')) {
-                label = "Motocycliste (Rider)";
+                label = isFr ? "Motocycliste (Rider)" : "Motorcycle Rider";
                 tagClass = "tag-rider";
-                tagText = `👤 CONDUCTEUR (${Math.round(det.confidence * 100)}%)`;
+                tagText = isFr ? `👤 CONDUCTEUR (${Math.round(det.confidence * 100)}%)` : `👤 RIDER (${Math.round(det.confidence * 100)}%)`;
             } else if (cls.includes('plate') || cls.includes('number')) {
-                label = "Plaque Minéralogique";
+                label = isFr ? "Plaque Minéralogique" : "License Plate";
                 tagClass = "tag-plate";
                 const pTxt = det.plate_text || (det.class.match(/\[(.*?)\]/) ? det.class.match(/\[(.*?)\]/)[1] : 'ALPR');
                 tagText = `🔍 [${pTxt}]`;
@@ -917,38 +924,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. Rendu du Tableau Télémétrique
     // ----------------------------------------------------
     function renderResultsTable(data) {
+        const isFr = (currentLang === 'fr');
         resultsBody.innerHTML = '';
 
         if (currentDetections.length === 0) {
-            resultsBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Aucun objet de sécurité détecté sur ce cliché.</td></tr>`;
+            resultsBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">${isFr ? "Aucun objet de sécurité détecté sur ce cliché." : "No safety objects identified on this snapshot."}</td></tr>`;
             return;
         }
 
         currentDetections.forEach(det => {
             const cls = det.class.toLowerCase();
             let badgeClass = 'badge-class';
-            let qualif = 'Information';
+            let qualif = isFr ? 'Information' : 'Information';
             let qualifClass = 'badge-severity info';
 
             if (cls.includes('without') || cls.includes('no_helmet')) {
                 badgeClass += ' no-helmet';
-                qualif = 'Infraction Majeure';
+                qualif = isFr ? 'Infraction Majeure' : 'Major Violation';
                 qualifClass = 'badge-severity critical';
             } else if (cls.includes('with') || cls.includes('helmet')) {
                 badgeClass += ' helmet';
-                qualif = 'Conforme';
+                qualif = isFr ? 'Conforme' : 'Compliant';
                 qualifClass = 'badge-severity info';
             } else if (cls.includes('rider')) {
                 badgeClass += ' rider';
-                qualif = 'Cible Mobile';
+                qualif = isFr ? 'Cible Mobile' : 'Mobile Target';
             } else {
                 badgeClass += ' license-plate';
-                qualif = 'Immatriculation';
+                qualif = isFr ? 'Immatriculation' : 'Registration';
+            }
+
+            let dispClass = det.class;
+            if (!isFr) {
+                if (cls.includes('without') || cls.includes('no_helmet')) dispClass = 'No Helmet';
+                else if (cls.includes('with') || cls.includes('helmet')) dispClass = 'Helmet';
+                else if (cls.includes('rider')) dispClass = 'Rider';
+                else if (cls.includes('plate') || cls.includes('number')) dispClass = 'License Plate';
             }
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><span class="${badgeClass}">${det.class}</span></td>
+                <td><span class="${badgeClass}">${dispClass}</span></td>
                 <td><strong>${Math.round(det.confidence * 100)}%</strong></td>
                 <td><code>[${det.box.join(', ')}]</code></td>
                 <td><span class="${qualifClass}">${qualif}</span></td>
