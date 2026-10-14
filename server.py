@@ -88,6 +88,10 @@ class AsyncVideoCamera:
                     return buf.tobytes()
         return None
 
+    def stop(self):
+        """Arrête proprement le thread daemon de streaming."""
+        self.running = False
+
     def _capture_worker(self):
         """Boucle d'acquisition continue isolée dans son propre thread système."""
         color_map = {
