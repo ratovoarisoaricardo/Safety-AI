@@ -38,6 +38,8 @@
   - [1. Partitionnement Physique des Données](#1-partitionnement-physique-des-données)
   - [2. Classes & Formats YOLOv5](#2-classes-et-formats-dannotation-yolov5)
   - [3. Outils du Cycle de Données (Toolchain)](#3-outils-du-cycle-de-données-data-toolchain)
+- [🎓 Guide d'Entraînement : Obtenir `best.pt` via Roboflow & Google Colab](#-guide-dentraînement--comment-obtenir-bestpt-via-roboflow--google-colab)
+- [🌐 Dépôts Open Source GitHub pour Plaques d'Immatriculation](#-dépôts-open-source-github--datasets-pour-plaques-dimmatriculation)
 - [✨ Fonctionnalités Clés / Key Features](#-fonctionnalités-clés--key-features)
 - [🌐 Système Bilingue / Bilingual UI](#-système-bilingue--bilingual-ui)
 - [📁 Structure Complète du Projet](#-structure-complète-du-projet)
@@ -321,6 +323,132 @@ Pour alimenter, enrichir et exploiter ces jeux de données, SafeCityAI fournit u
   ```bash
   python train_cctv_isolated.py
   ```
+
+---
+
+## 🎓 Guide d'Entraînement : Comment Obtenir `best.pt` via Roboflow & Google Colab
+
+Le fichier **`best.pt`** représente le point d'orgue de l'apprentissage profond : il contient les poids synaptiques optimaux du réseau de neurones YOLOv5 qui maximisent la précision moyenne (**mAP@0.5**) sur le jeu de données de test.
+
+Voici la méthodologie étape par étape pour concevoir votre jeu de données, entraîner le modèle sur **Google Colab avec GPU gratuit**, et exporter `best.pt` dans SafeCityAI :
+
+### 1. 📦 Constitution et Annotation du Dataset sur Roboflow
+
+[Roboflow](https://roboflow.com/) est la plateforme de référence pour labelliser, augmenter et exporter des bases de données de vision par ordinateur au format YOLOv5 :
+
+1. **Création du Projet** :
+   - Créez un compte gratuit sur [roboflow.com](https://roboflow.com/) et créez un nouveau projet de type **Object Detection**.
+   - Nommez le projet (ex : `safecity-traffic-detection`).
+2. **Définition de l'Ontologie des Classes** :
+   - Ajoutez vos classes cibles : `Helmet`, `No_Helmet`, `License_Plate`, `Rider` (et optionnellement `Seatbelt`, `No_Seatbelt`).
+3. **Importation & Étiquetage (Labeling)** :
+   - Téléversez vos photos de rue ou les frames extraites de vos vidéos avec `extract_cctv_frames.py`.
+   - Utilisez l'outil de cadrage rectangulaire pour dessiner les boîtes englobantes autour des têtes (avec/sans casque), des motards et des plaques.
+4. **Augmentation des Données (Data Augmentation)** :
+   - Pour rendre le modèle robuste au flou de mouvement, aux reflets du soleil et à la nuit, activez les augmentations recommandées :
+     - *Flips horizontaux* (50%).
+     - *Crop & Zoom aléatoires* (0% à 20%).
+     - *Ajustement de luminosité et contraste* (±15%).
+     - *Flou cinétique (Blur)* (jusqu'à 2.5px pour simuler la vitesse).
+     - *Mosaïque 4 images (Mosaic 4-up)* : assemble 4 images en une seule pour forcer la détection d'objets de petite taille (plaques et casques lointains).
+5. **Exportation au Format YOLOv5 PyTorch** :
+   - Cliquez sur **Generate Version**, puis sur **Export Dataset**.
+   - Choisissez impérativement le format **`YOLOv5 PyTorch`**.
+   - Téléchargez l'archive `.zip` (ex: `rider-helmet-no-helmet-lic-plate.yolov5pytorch.zip`) ou copiez le snippet de téléchargement direct par clé API.
+
+---
+
+### 2. ⚡ Entraînement Haute Performance sur Google Colab (GPU Gratuit)
+
+Le projet intègre un notebook Jupyter complet prêt à l'emploi : [`notebooks/SafeCityAI_YOLOv5.ipynb`](notebooks/SafeCityAI_YOLOv5.ipynb).
+
+Suivez ce protocole pas à pas pour entraîner votre modèle en ~15 minutes :
+
+#### Étape A : Configuration de la Machine Virtuelle avec GPU
+1. Rendez-vous sur [Google Colab](https://colab.research.google.com/) et ouvrez le notebook [`notebooks/SafeCityAI_YOLOv5.ipynb`](notebooks/SafeCityAI_YOLOv5.ipynb) (ou déposez-le sur votre Google Drive).
+2. Activez l'accélérateur matériel : Menu **Exécution > Modifier le type d'exécution > Accélérateur matériel > T4 GPU**.
+3. Vérifiez la disponibilité de la carte graphique :
+   ```bash
+   !nvidia-smi
+   ```
+
+#### Étape B : Installation de l'Environnement Ultralytics YOLOv5
+```python
+# Cloner le dépôt officiel Ultralytics et installer les dépendances
+!git clone https://github.com/ultralytics/yolov5.git
+%cd yolov5
+!pip install -r requirements.txt
+```
+
+#### Étape C : Décompression du Dataset Roboflow
+Glissez-déposez votre archive ZIP issue de Roboflow dans la barre latérale gauche de Colab (dossier `/content`), puis exécutez :
+```python
+import zipfile
+import os
+
+%cd /content
+zip_path = "rider-helmet-no-helmet-lic-plate.yolov5pytorch.zip"
+
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall("dataset")
+
+print("Dataset prêt dans /content/dataset !")
+%cd /content/yolov5
+```
+
+#### Étape D : Lancement du Transfer Learning (Entraînement)
+Lancez l'apprentissage par transfert à partir des poids pré-entraînés `yolov5s.pt` (small - rapide et léger pour l'inférence temps réel) :
+```bash
+!python train.py \
+  --img 640 \
+  --batch 16 \
+  --epochs 50 \
+  --data /content/dataset/data.yaml \
+  --weights yolov5s.pt \
+  --cache
+```
+
+* **`--img 640`** : Résolution standard native des réseaux YOLO.
+* **`--batch 16`** : Taille de lot optimisée pour les 16 Go de VRAM du GPU Tesla T4.
+* **`--epochs 50`** : Nombre de cycles complets d'apprentissage (suffisant pour converger avec transfer learning).
+* **`--weights yolov5s.pt`** : Point de départ pré-entraîné sur les 80 classes COCO.
+
+#### Étape E : Téléchargement du Fichier `best.pt`
+À la fin des 50 epochs, YOLOv5 sauvegarde automatiquement le checkpoint ayant obtenu le meilleur mAP dans `runs/train/exp/weights/best.pt`.
+Téléchargez-le sur votre poste local via :
+```python
+from google.colab import files
+files.download('runs/train/exp/weights/best.pt')
+```
+
+---
+
+### 3. 🔌 Déploiement de `best.pt` dans SafeCityAI
+
+Une fois le fichier `best.pt` téléchargé :
+1. Placez une copie à la racine du projet : `safecity-ai/best.pt`.
+2. Placez la copie active dans le dossier des modèles : `safecity-ai/weights/best_image.pt`.
+3. Conservez impérativement la copie de secours en lecture seule : `safecity-ai/weights/best_image_backup.pt`.
+4. Relancez le serveur :
+   ```bash
+   python server.py
+   ```
+   SafeCityAI chargera automatiquement vos nouveaux poids neuronaux certifiés avec votre nouvelle cartographie de classes !
+
+---
+
+## 🌐 Dépôts Open Source GitHub & Datasets pour Plaques d'Immatriculation
+
+Si vous recherchez des jeux de données réels massifs ou des modèles pré-entraînés spécialisés dans la détection et la lecture de plaques minéralogiques (**ALPR / ANPR / License Plate Recognition**), voici les meilleures ressources open source éprouvées :
+
+| Nom de la Ressource | Lien Officiel GitHub / Source | Description & Points Forts |
+| :--- | :--- | :--- |
+| **CCPD (Chinese City Parking Dataset)** | [github.com/detectRecog/CCPD](https://github.com/detectRecog/CCPD) | **+250 000 images** haute résolution de plaques en conditions réelles (pluie, nuit, neige, inclinaisons extrêmes jusqu'à 60°, flou cinétique). *Intégré nativement dans SafeCityAI via `ccpd_tool.py`*. |
+| **Indian Number Plate Detection (YOLOv5)** | [github.com/Anurag-Bambardekar/...](https://github.com/Anurag-Bambardekar/Indian-Number-Plate-Recognition-using-YOLOv5) | Modèle YOLOv5 et pipeline EasyOCR spécialement entraînés sur les **plaques d'immatriculation indiennes (formats RTO à 1 et 2 lignes)** pour motos et voitures. |
+| **Roboflow Universe - Vehicle License Plates** | [universe.roboflow.com/search?q=license+plate](https://universe.roboflow.com/search?q=license+plate) | Des dizaines de banques de données communautaires gratuites contenant des milliers d'images annotées pour plaques motos (recherchez : *motorcycle helmet*, *indian license plates*, *european license plates*). |
+| **OpenALPR Benchmarks & Datasets** | [github.com/openalpr/benchmarks](https://github.com/openalpr/benchmarks) | Banc d'essai officiel open-source contenant des flux vidéos et photos de véhicules avec étiquetage au caractère près pour calibrer l'OCR. |
+| **UFPR-ALPR Dataset (Motos & Voitures)** | [github.com/raysonlaroca/ufpr-alpr-dataset](https://github.com/raysonlaroca/ufpr-alpr-dataset) | **4 500 images et 150 vidéos** de circulation réelle filmées par des caméras de surveillance routières avec annotations complètes véhicule + plaque + caractères individuels. |
+| **Ultralytics YOLOv5 Official Hub** | [github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5) | Code source de référence, gestionnaires d'export TensorRT/ONNX et documentation pour adapter les têtes de détection. |
 
 ---
 
