@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
             report_title: "📋 Rapport Opérationnel pour Officier de Contrôle",
             report_stamp: "OFFICIEL",
             r_legal_label: "Constat Légal :",
+            r_jurisdiction_label: "Cadre Juridique :",
+            r_penalty_label: "Sanction Prévue :",
             r_equip_label: "Équipement constaté :",
             r_plate_label: "Immatriculation :",
             r_action_label: "Action Système :",
@@ -129,6 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
             report_title: "📋 Official Inspection Report for Enforcement Officer",
             report_stamp: "OFFICIAL",
             r_legal_label: "Legal Finding:",
+            r_jurisdiction_label: "Legal Framework:",
+            r_penalty_label: "Applicable Penalty:",
             r_equip_label: "Observed Equipment:",
             r_plate_label: "License Plate:",
             r_action_label: "System Action:",
@@ -201,6 +205,44 @@ document.addEventListener('DOMContentLoaded', () => {
     setLanguage(currentLang);
 
     // ----------------------------------------------------
+    // 0.bis Système Régional / Juridique Adaptatif (Auto / Inde / France)
+    // ----------------------------------------------------
+    let currentRegion = localStorage.getItem('safecity_region') || 'AUTO';
+    const regionBtnAuto = document.getElementById('regionBtnAuto');
+    const regionBtnIn = document.getElementById('regionBtnIn');
+    const regionBtnFr = document.getElementById('regionBtnFr');
+
+    function setRegion(region) {
+        currentRegion = region;
+        localStorage.setItem('safecity_region', region);
+        [regionBtnAuto, regionBtnIn, regionBtnFr].forEach(btn => {
+            if (!btn) return;
+            if (btn.getAttribute('data-region') === region) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Informer le serveur de la juridiction active
+        fetch('/api/set_region', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ region: region })
+        }).catch(err => console.warn('Region update notice:', err));
+
+        // Mettre à jour l'affichage si un scan est en cours
+        if (lastScanData) {
+            renderDetailedScanResults(lastScanData);
+        }
+    }
+
+    if (regionBtnAuto) regionBtnAuto.addEventListener('click', () => setRegion('AUTO'));
+    if (regionBtnIn) regionBtnIn.addEventListener('click', () => setRegion('IN'));
+    if (regionBtnFr) regionBtnFr.addEventListener('click', () => setRegion('FR'));
+    setRegion(currentRegion);
+
+    // ----------------------------------------------------
     // 1. Navigation entre les Modes (Onglets Principaux)
     // ----------------------------------------------------
     const tabModeImage = document.getElementById('tabModeImage');
@@ -255,9 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const evidenceCardsContainer = document.getElementById('evidenceCardsContainer');
     const plateRecognitionCard = document.getElementById('plateRecognitionCard');
+    const plateBadgeMetal = document.getElementById('plateBadgeMetal');
+    const plateCountryStrip = document.getElementById('plateCountryStrip');
     const plateTextVal = document.getElementById('plateTextVal');
 
     const rLegalStatus = document.getElementById('rLegalStatus');
+    const rJurisdiction = document.getElementById('rJurisdiction');
+    const rPenalty = document.getElementById('rPenalty');
     const rEquipStatus = document.getElementById('rEquipStatus');
     const rPlateStatus = document.getElementById('rPlateStatus');
     const rActionStatus = document.getElementById('rActionStatus');
@@ -430,6 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function uploadImageAndDraw(file) {
         const formData = new FormData();
         formData.append('image', file);
+        formData.append('region', currentRegion);
 
         fetch('/api/detect', {
             method: 'POST',
@@ -457,6 +504,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const h = sourceImage.naturalHeight || 480;
         const isHelmet = filename.toLowerCase().includes('02') || filename.toLowerCase().includes('04');
 
+        const isFr = (currentRegion === 'FR');
+        const fallbackPlate = isFr ? "AB-123-CD" : "TN 09 BJ 4054";
+        const fallbackFlag = isFr ? "🇫🇷" : "🇮🇳";
+        const fallbackRegCode = isFr ? "FR" : "IN";
+        const fallbackRegName = isFr ? "France" : "Inde";
+        const fallbackLawFr = isFr ? "Art. R431-1 du Code de la Route" : "Section 129, Indian Motor Vehicles Act";
+        const fallbackLawEn = isFr ? "French Highway Code Art. R431-1" : "Section 129, Indian Motor Vehicles Act";
+        const fallbackPenaltyFr = isFr ? "Amende forfaitaire de 135 € + Retrait de 3 points" : "Amende forfaitaire de ₹1,000 INR + suspension 3 mois";
+        const fallbackPenaltyEn = isFr ? "Fine €135 + 3 Demerit Points" : "Fine ₹1,000 INR + 3 Months License Suspension";
+
         const detections = [
             {
                 "class": isHelmet ? "Helmet" : "No_Helmet",
@@ -469,8 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 "box": [Math.round(w * 0.38), Math.round(h * 0.16), Math.round(w * 0.28), Math.round(h * 0.58)]
             },
             {
-                "class": "License_Plate [66-K1 0315]",
-                "plate_text": "66-K1 0315",
+                "class": `License_Plate [${fallbackFlag} ${fallbackPlate}]`,
+                "plate_text": fallbackPlate,
                 "confidence": 0.964,
                 "box": [Math.round(w * 0.42), Math.round(h * 0.72), Math.round(w * 0.20), Math.round(h * 0.10)]
             }
@@ -482,15 +539,22 @@ document.addEventListener('DOMContentLoaded', () => {
             "width": w,
             "height": h,
             "detections": detections,
-            "plate_detected": "66-K1 0315",
+            "plate_detected": fallbackPlate,
             "verdict": {
                 "status": isHelmet ? "COMPLIANT" : "VIOLATION",
                 "label": isHelmet ? "CONFORME : CASQUE DE PROTECTION HOMOLOGUÉ" : "INFRACTION DÉTECTÉE : CONDUCTEUR SANS CASQUE",
                 "confidence": 0.935,
-                "plate": "66-K1 0315",
+                "plate": fallbackPlate,
+                "region": fallbackRegCode,
+                "region_name": fallbackRegName,
+                "flag": fallbackFlag,
+                "law_article_fr": fallbackLawFr,
+                "law_article_en": fallbackLawEn,
+                "penalty_fr": fallbackPenaltyFr,
+                "penalty_en": fallbackPenaltyEn,
                 "summary": isHelmet 
-                    ? "Conducteur muni d'un équipement de protection individuel réglementaire. Aucune infraction constatée sur ce contrôle."
-                    : "Non-respect de l'obligation du port du casque de sécurité homologué (Art. R431-1). Infraction avérée constatée par intelligence artificielle.",
+                    ? `Conducteur muni d'un équipement conforme (${fallbackRegName}). Aucune infraction constatée.`
+                    : `Infraction constatée au ${fallbackLawFr} (${fallbackRegName}). ${fallbackPenaltyFr}`,
                 "action": isHelmet 
                     ? "Contrôle clôturé sans suite - Données d'audit archivées."
                     : "Avis de contravention généré avec dossier de preuves numériques rattaché."
@@ -509,14 +573,20 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDetections = data.detections || [];
         detectedCountSpan.textContent = currentDetections.length;
 
+        const v = data.verdict || {};
+        const isFr = (currentLang === 'fr');
+        const flag = v.flag || (currentRegion === 'FR' ? '🇫🇷' : '🇮🇳');
+        const regCode = v.region || (currentRegion === 'FR' ? 'FR' : 'IN');
+        const regName = v.region_name || (currentRegion === 'FR' ? 'France' : 'Inde');
+
         // 1. Tracé des boîtes sur le canvas
         drawBoundingBoxes(data);
 
         // 2. Analyse et Détermination de la Gravité
-        let hasNoHelmet = false;
-        let hasHelmet = false;
-        let detectedPlate = data.plate_detected || null;
-        let maxConfidence = 0.92;
+        let hasNoHelmet = (v.status === 'VIOLATION');
+        let hasHelmet = (v.status === 'COMPLIANT');
+        let detectedPlate = v.plate || data.plate_detected || null;
+        let maxConfidence = v.confidence || 0.92;
 
         currentDetections.forEach(det => {
             const cls = det.class.toLowerCase();
@@ -532,28 +602,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (det.plate_text) {
                 detectedPlate = det.plate_text;
             } else if (cls.includes('plate') || cls.includes('number')) {
-                // Extraire le texte de plaque si présent dans le nom de classe
                 const match = det.class.match(/\[(.*?)\]/);
-                if (match) detectedPlate = match[1];
-                else if (!detectedPlate) detectedPlate = "TN 09 BJ 4054";
+                if (match) {
+                    const parts = match[1].split(' ');
+                    detectedPlate = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+                }
             }
         });
 
         const isViolation = hasNoHelmet;
         const isCompliant = hasHelmet && !hasNoHelmet;
-        const isFr = (currentLang === 'fr');
 
         // 3. Mise à jour de la CARTE HERO DE VERDICT
         verdictBanner.className = 'verdict-banner ' + (isViolation ? 'violation' : (isCompliant ? 'compliant' : 'observation'));
         
+        const lawArticle = isFr ? (v.law_article_fr || "Art. R431-1 du Code de la Route") : (v.law_article_en || "Traffic Safety Regulation");
+        const penaltyDesc = isFr ? (v.penalty_fr || "Sanction légale applicable") : (v.penalty_en || "Applicable penalty");
+
         if (isViolation) {
             verdictIcon.textContent = '🚨';
-            verdictBadge.textContent = isFr ? 'INFRACTION ROUTIÈRE DÉTECTÉE' : 'TRAFFIC VIOLATION DETECTED';
+            verdictBadge.textContent = isFr ? `INFRACTION ROUTIÈRE DÉTECTÉE (${flag} ${regName})` : `TRAFFIC VIOLATION DETECTED (${flag} ${regName})`;
             verdictConfidence.textContent = isFr ? `Certitude IA : ${(maxConfidence * 100).toFixed(1)}%` : `AI Confidence: ${(maxConfidence * 100).toFixed(1)}%`;
             verdictTitle.textContent = isFr ? 'Défaut de Port du Casque de Protection Obligatoire' : 'Failure to Wear Mandatory Safety Helmet';
             verdictDescription.textContent = isFr 
-                ? "Le motocycliste est formellement identifié en circulation sans casque de sécurité homologué. Manquement aux règles de sécurité du Code de la Route (Art. R431-1)."
-                : "The motorcycle rider is formally identified operating without an approved safety helmet. Violation of mandatory road safety regulations (Art. R431-1).";
+                ? `Le motocycliste est formellement identifié en circulation sans casque de sécurité homologué. Manquement aux règles du ${lawArticle} (${flag} ${regName}).`
+                : `The motorcycle rider is formally identified operating without an approved safety helmet. Violation of ${lawArticle} (${flag} ${regName}).`;
             
             // Stats compteur
             detectionsLogged += 1;
@@ -561,41 +634,59 @@ document.addEventListener('DOMContentLoaded', () => {
             totalViolationsCounter.classList.add('text-red');
         } else if (isCompliant) {
             verdictIcon.textContent = '🛡️';
-            verdictBadge.textContent = isFr ? 'SITUATION CONFORME' : 'COMPLIANT STATUS';
+            verdictBadge.textContent = isFr ? `SITUATION CONFORME (${flag} ${regName})` : `COMPLIANT STATUS (${flag} ${regName})`;
             verdictConfidence.textContent = isFr ? `Certitude IA : ${(maxConfidence * 100).toFixed(1)}%` : `AI Confidence: ${(maxConfidence * 100).toFixed(1)}%`;
             verdictTitle.textContent = isFr ? 'Casque Réglementaire Porté & Homologué' : 'Approved Helmet Worn & Verified';
             verdictDescription.textContent = isFr 
-                ? "Le motocycliste est muni d'un équipement de protection individuel conforme. Port du casque vérifié avec un niveau de confiance maximal."
-                : "The motorcycle rider is equipped with compliant personal protective equipment. Helmet use verified with maximum confidence.";
+                ? `Le motocycliste est muni d'un équipement de protection individuel conforme. Port du casque vérifié avec un niveau de confiance maximal (${regName}).`
+                : `The motorcycle rider is equipped with compliant personal protective equipment. Helmet use verified with maximum confidence (${regName}).`;
         } else {
             verdictIcon.textContent = '🔍';
-            verdictBadge.textContent = isFr ? 'CONTRÔLE EFFECTUÉ' : 'INSPECTION COMPLETED';
+            verdictBadge.textContent = isFr ? `CONTRÔLE EFFECTUÉ (${flag} ${regName})` : `INSPECTION COMPLETED (${flag} ${regName})`;
             verdictConfidence.textContent = isFr ? `Certitude IA : ${(maxConfidence * 100).toFixed(1)}%` : `AI Confidence: ${(maxConfidence * 100).toFixed(1)}%`;
             verdictTitle.textContent = isFr ? 'Véhicule & Usager Relevés dans le Secteur' : 'Vehicle & Road User Logged in Sector';
             verdictDescription.textContent = isFr 
-                ? `${currentDetections.length} élément(s) identifié(s) lors du balayage de la scène routière. Données archivées pour télémétrie.`
-                : `${currentDetections.length} target(s) identified during roadway scan. Data logged for telemetry audit.`;
+                ? `${currentDetections.length} élément(s) identifié(s) lors du balayage de la scène routière (${regName}). Données archivées pour télémétrie.`
+                : `${currentDetections.length} target(s) identified during roadway scan (${regName}). Data logged for telemetry audit.`;
         }
 
         // 4. Génération des VIGNETTES DE PREUVES DÉCOUPÉES (DYNAMIC CROPS)
         renderEvidenceCrops(data);
 
         // 5. Mise à jour du Cartouche ALPR de Plaque
-        if (detectedPlate) {
-            plateTextVal.textContent = detectedPlate;
-            rPlateStatus.textContent = isFr 
-                ? `${detectedPlate} (Immatriculation certifiée par OCR)`
-                : `${detectedPlate} (License plate certified by OCR)`;
-        } else {
-            plateTextVal.textContent = isFr ? "PLAQUE NON VISIBLE" : "PLATE NOT VISIBLE";
-            rPlateStatus.textContent = isFr ? "Masquée par angle de vue ou absente" : "Obscured by camera angle or missing";
+        if (plateCountryStrip) {
+            plateCountryStrip.textContent = `${flag} ${regCode}`;
         }
 
-        // 6. Mise à jour du Procès-Verbal / Rapport Opérationnel
+        if (detectedPlate && detectedPlate !== 'NON_LISIBLE' && detectedPlate !== 'PLAQUE NON LISIBLE') {
+            plateTextVal.textContent = detectedPlate;
+            rPlateStatus.textContent = isFr 
+                ? `${detectedPlate} (${flag} ${regName} - Validé ALPR)`
+                : `${detectedPlate} (${flag} ${regName} - ALPR Certified)`;
+        } else {
+            plateTextVal.textContent = isFr ? "PLAQUE NON VISIBLE" : "PLATE NOT VISIBLE";
+            rPlateStatus.textContent = isFr ? "Masquée, basse résolution ou angle défavorable" : "Obscured, low-res or unfavorable viewing angle";
+        }
+
+        // 6. Mise à jour du Procès-Verbal / Rapport Opérationnel & Cadre Juridique
+        if (rJurisdiction) {
+            rJurisdiction.textContent = lawArticle;
+        }
+
+        if (rPenalty) {
+            if (isViolation) {
+                rPenalty.className = "r-value text-red";
+                rPenalty.textContent = penaltyDesc;
+            } else {
+                rPenalty.className = "r-value text-emerald";
+                rPenalty.textContent = isFr ? "Aucune infraction constatée sur ce contrôle" : "No violation recorded for this inspection";
+            }
+        }
+
         if (isViolation) {
             rLegalStatus.textContent = isFr 
-                ? "Infraction caractérisée au Code de la Route (Art. R431-1) : Amende & Retrait de points"
-                : "Traffic Code Violation (Art. R431-1): Citation fine & points deduction";
+                ? `Infraction caractérisée constatée par IA (${flag} ${regName})`
+                : `Characterized road safety violation detected by AI (${flag} ${regName})`;
             rLegalStatus.className = "r-value text-red";
             rEquipStatus.textContent = isFr 
                 ? "Défaut de port du casque de protection sur deux-roues motorisé"
@@ -606,8 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
             rActionStatus.className = "r-value text-cyan";
         } else if (isCompliant) {
             rLegalStatus.textContent = isFr 
-                ? "Usager en règle avec les dispositions de sécurité routière"
-                : "Road user compliant with traffic safety regulations";
+                ? `Usager en règle avec les dispositions de sécurité routière (${regName})`
+                : `Road user compliant with traffic safety regulations (${regName})`;
             rLegalStatus.className = "r-value text-emerald";
             rEquipStatus.textContent = isFr 
                 ? "Casque de protection porté et attaché"
@@ -837,15 +928,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (copyReportBtn) {
         copyReportBtn.addEventListener('click', () => {
             const isFr = (currentLang === 'fr');
+            const jurText = rJurisdiction ? rJurisdiction.textContent : '';
+            const penText = rPenalty ? rPenalty.textContent : '';
+
             const textToCopy = isFr ? `=====================================================
 RAPPORT OFFICIEL DE CONSTATATION - SAFECITYAI
 =====================================================
 Fichier Image  : ${scanFilenameTag.textContent}
 Date & Heure   : ${new Date().toLocaleString('fr-FR')}
 Résultat Légal : ${rLegalStatus.textContent}
+Cadre Juridique: ${jurText}
+Sanction Prévue: ${penText}
 Équipement     : ${rEquipStatus.textContent}
 Plaque Immat   : ${rPlateStatus.textContent}
-Moteur IA      : YOLOv5 (best_image.pt) + ALPR EasyOCR
+Moteur IA      : YOLOv5 (best_image.pt) + ALPR EasyOCR Multirégional
 Statut Dossier : Prêt pour transmission
 =====================================================` : `=====================================================
 OFFICIAL ENFORCEMENT REPORT - SAFECITYAI
@@ -853,9 +949,11 @@ OFFICIAL ENFORCEMENT REPORT - SAFECITYAI
 Image File     : ${scanFilenameTag.textContent}
 Date & Time    : ${new Date().toLocaleString('en-US')}
 Legal Finding  : ${rLegalStatus.textContent}
+Legal Framework: ${jurText}
+Penalty Action : ${penText}
 Equipment      : ${rEquipStatus.textContent}
 License Plate  : ${rPlateStatus.textContent}
-AI Engine      : YOLOv5 (best_image.pt) + ALPR EasyOCR
+AI Engine      : YOLOv5 (best_image.pt) + Multiregional ALPR EasyOCR
 Dossier Status : Ready for submission
 =====================================================`;
 
@@ -872,9 +970,12 @@ Dossier Status : Ready for submission
     if (downloadProofBtn) {
         downloadProofBtn.addEventListener('click', () => {
             const isFr = (currentLang === 'fr');
+            const jurText = rJurisdiction ? rJurisdiction.textContent : '';
+            const penText = rPenalty ? rPenalty.textContent : '';
+
             const content = isFr 
-                ? `DOSSIER DE PREUVES NUMÉRIQUES SAFECITYAI\n\nImage source: ${scanFilenameTag.textContent}\nHorodatage: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nDescription: ${verdictDescription.textContent}\nImmatriculation relevée: ${plateTextVal.textContent}\n\nObjets détectés:\n${JSON.stringify(currentDetections, null, 2)}`
-                : `SAFECITYAI DIGITAL EVIDENCE DOSSIER\n\nSource Image: ${scanFilenameTag.textContent}\nTimestamp: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nDescription: ${verdictDescription.textContent}\nPlate Extracted: ${plateTextVal.textContent}\n\nDetected Targets:\n${JSON.stringify(currentDetections, null, 2)}`;
+                ? `DOSSIER DE PREUVES NUMÉRIQUES SAFECITYAI\n\nImage source: ${scanFilenameTag.textContent}\nHorodatage: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nCadre juridique: ${jurText}\nSanction: ${penText}\nDescription: ${verdictDescription.textContent}\nImmatriculation relevée: ${plateTextVal.textContent}\n\nObjets détectés:\n${JSON.stringify(currentDetections, null, 2)}`
+                : `SAFECITYAI DIGITAL EVIDENCE DOSSIER\n\nSource Image: ${scanFilenameTag.textContent}\nTimestamp: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nLegal Framework: ${jurText}\nPenalty: ${penText}\nDescription: ${verdictDescription.textContent}\nPlate Extracted: ${plateTextVal.textContent}\n\nDetected Targets:\n${JSON.stringify(currentDetections, null, 2)}`;
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -946,35 +1047,59 @@ Dossier Status : Ready for submission
     // FONCTIONNALITÉ CLÉ : Capture de la frame CCTV vers le Mode Analyse Image
     if (cctvSnapshotBtn) {
         cctvSnapshotBtn.addEventListener('click', () => {
-            cctvSnapshotBtn.textContent = '⏳ Capture en cours...';
+            const isFr = (currentLang === 'fr');
+            cctvSnapshotBtn.textContent = isFr ? '⏳ Capture HD en cours...' : '⏳ Capturing HD Frame...';
 
-            // Création d'un canvas pour extraire l'image courante
-            const snapCanvas = document.createElement('canvas');
-            snapCanvas.width = 640;
-            snapCanvas.height = 360;
-            const snapCtx = snapCanvas.getContext('2d');
+            function fallbackCanvasCapture() {
+                try {
+                    const snapCanvas = document.createElement('canvas');
+                    snapCanvas.width = 640;
+                    snapCanvas.height = 360;
+                    const snapCtx = snapCanvas.getContext('2d');
 
-            if (isRealStreamActive && cctvLiveStream) {
-                // Dessiner l'image du flux
-                snapCtx.drawImage(cctvLiveStream, 0, 0, snapCanvas.width, snapCanvas.height);
-            } else if (cctvSimCanvas) {
-                snapCtx.drawImage(cctvSimCanvas, 0, 0, snapCanvas.width, snapCanvas.height);
+                    if (isRealStreamActive && cctvLiveStream) {
+                        snapCtx.drawImage(cctvLiveStream, 0, 0, snapCanvas.width, snapCanvas.height);
+                    } else if (cctvSimCanvas) {
+                        snapCtx.drawImage(cctvSimCanvas, 0, 0, snapCanvas.width, snapCanvas.height);
+                    }
+
+                    snapCanvas.toBlob((blob) => {
+                        cctvSnapshotBtn.textContent = isFr ? '📸 Capturer la Frame pour Scan Immédiat' : '📸 Capture Frame for Instant Scan';
+                        if (!blob) {
+                            alert(isFr ? 'Erreur lors de la capture de la frame.' : 'Error during frame capture.');
+                            return;
+                        }
+                        const capturedFile = new File([blob], `cctv_capture_${Date.now()}.png`, { type: 'image/png' });
+                        switchMode('image');
+                        handleUploadedFile(capturedFile);
+                    }, 'image/png');
+                } catch(err) {
+                    console.error("Canvas draw fallback error:", err);
+                    cctvSnapshotBtn.textContent = isFr ? '📸 Capturer la Frame pour Scan Immédiat' : '📸 Capture Frame for Instant Scan';
+                }
             }
 
-            snapCanvas.toBlob((blob) => {
-                cctvSnapshotBtn.textContent = '📸 Capturer la Frame pour Scan Immédiat';
-                if (!blob) {
-                    alert('Erreur lors de la capture de la frame.');
-                    return;
-                }
-                const capturedFile = new File([blob], `cctv_capture_${Date.now()}.png`, { type: 'image/png' });
-
-                // Basculer automatiquement sur le Mode Analyse Image
-                switchMode('image');
-
-                // Lancer l'analyse complète
-                handleUploadedFile(capturedFile);
-            }, 'image/png');
+            if (isRealStreamActive) {
+                // Appel direct à l'API /api/cctv_snapshot pour obtenir le PNG brut non compressé depuis le buffer mémoire
+                // Élimine à 100% l'erreur de sécurité 'Tainted Canvas' et la latence
+                fetch('/api/cctv_snapshot')
+                    .then(res => {
+                        if (!res.ok) throw new Error("Erreur de snapshot serveur");
+                        return res.blob();
+                    })
+                    .then(blob => {
+                        cctvSnapshotBtn.textContent = isFr ? '📸 Capturer la Frame pour Scan Immédiat' : '📸 Capture Frame for Instant Scan';
+                        const capturedFile = new File([blob], `cctv_capture_${Date.now()}.png`, { type: 'image/png' });
+                        switchMode('image');
+                        handleUploadedFile(capturedFile);
+                    })
+                    .catch(err => {
+                        console.warn("Direct snapshot notice, falling back to canvas:", err);
+                        fallbackCanvasCapture();
+                    });
+            } else {
+                fallbackCanvasCapture();
+            }
         });
     }
 

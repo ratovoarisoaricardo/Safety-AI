@@ -32,6 +32,11 @@
                     <div class="status-dot pulses" id="statusDot"></div>
                     <span class="status-text" id="statusText">Initialisation des moteurs IA...</span>
                 </div>
+                <div class="region-switch-container" aria-label="Juridiction et Format Routier" title="Sélecteur de Juridiction et Format de Plaque">
+                    <button class="region-btn active" id="regionBtnAuto" data-region="AUTO" title="Auto-Détection Automatique selon l'image">🌍 Auto</button>
+                    <button class="region-btn" id="regionBtnIn" data-region="IN" title="Réglementation Inde (RTO / Motor Vehicles Act)">🇮🇳 Inde</button>
+                    <button class="region-btn" id="regionBtnFr" data-region="FR" title="Réglementation France (SIV / Code de la Route)">🇫🇷 France</button>
+                </div>
                 <div class="lang-switch-container" aria-label="Language selector">
                     <button class="lang-btn active" id="langBtnFr" data-lang="fr" title="Passer en Français">🇫🇷 FR</button>
                     <button class="lang-btn" id="langBtnEn" data-lang="en" title="Switch to English">🇬🇧 EN</button>
@@ -206,7 +211,7 @@
                             <div class="plate-card-left">
                                 <span class="plate-label" data-i18n="plate_label">Plaque d'Immatriculation Extraite (ALPR OCR) :</span>
                                 <div class="plate-badge-metal" id="plateBadgeMetal">
-                                    <span class="plate-country-strip">F</span>
+                                    <span class="plate-country-strip" id="plateCountryStrip">🇮🇳 IND</span>
                                     <span class="plate-text-val" id="plateTextVal">TN 09 BJ 4054</span>
                                 </div>
                             </div>
@@ -225,7 +230,15 @@
                             <div class="summary-content" id="reportSummaryContent">
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_legal_label">Constat Légal :</span>
-                                    <span class="r-value text-red" id="rLegalStatus">Infraction caractérisée au Code de la Route (Art. R431-1)</span>
+                                    <span class="r-value text-red" id="rLegalStatus">Infraction caractérisée au Code de la Route</span>
+                                </div>
+                                <div class="report-row">
+                                    <span class="r-label" data-i18n="r_jurisdiction_label">Cadre Juridique :</span>
+                                    <span class="r-value text-amber" id="rJurisdiction">Section 129, Indian Motor Vehicles Act</span>
+                                </div>
+                                <div class="report-row">
+                                    <span class="r-label" data-i18n="r_penalty_label">Sanction Prévue :</span>
+                                    <span class="r-value text-red" id="rPenalty">Amende forfaitaire de ₹1,000 INR + suspension 3 mois</span>
                                 </div>
                                 <div class="report-row">
                                     <span class="r-label" data-i18n="r_equip_label">Équipement constaté :</span>
