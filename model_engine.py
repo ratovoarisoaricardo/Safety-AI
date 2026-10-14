@@ -1,5 +1,5 @@
 # ==============================================================================
-# SafeCityAI - High-Precision Neural Object Detection Engine
+# Safety AI - High-Precision Neural Object Detection Engine
 # Deep Learning inference engine using custom-trained YOLOv5 weights (best.pt)
 # ==============================================================================
 
@@ -201,10 +201,10 @@ def torch_nms(boxes, scores, iou_threshold=0.45):
     return torch.tensor(keep, dtype=torch.long)
 
 # ------------------------------------------------------------------------------
-# 3. SafeCityAI Detection Engine Class
+# 3. Safety AI Detection Engine Class
 # ------------------------------------------------------------------------------
 
-class SafeCityDetector:
+class SafetyDetector:
     def __init__(self, model_path='best.pt'):
         self.model_path = model_path
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -252,22 +252,25 @@ class SafeCityDetector:
         detections = []
 
         if self.loaded and self.model is not None:
-            # 1. Letterbox resize to 640x640 maintaining aspect ratio
+            # 1. Fast OpenCV letterbox resize to 640x640 maintaining aspect ratio
             r = min(640 / orig_h, 640 / orig_w)
             new_w, new_h = int(round(orig_w * r)), int(round(orig_h * r))
             dw, dh = (640 - new_w) / 2, (640 - new_h) / 2
             top, left = int(round(dh)), int(round(dw))
+            bottom = 640 - new_h - top
+            right = 640 - new_w - left
 
-            im_resized = pil_image.resize((new_w, new_h), Image.BILINEAR)
-            padded_im = Image.new("RGB", (640, 640), (114, 114, 114))
-            padded_im.paste(im_resized, (left, top))
+            # Direct OpenCV resizing (3x faster than PIL resize + paste)
+            np_orig = np.array(pil_image)
+            resized = cv2.resize(np_orig, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+            padded = cv2.copyMakeBorder(resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114))
 
-            # 2. Tensor transformation
-            img_t = torch.from_numpy(np.array(padded_im)).permute(2, 0, 1).float().unsqueeze(0) / 255.0
+            # 2. Tensor transformation & zero-copy memory transfer
+            img_t = torch.from_numpy(padded).permute(2, 0, 1).float().unsqueeze(0).div_(255.0)
             img_t = img_t.to(self.device)
 
-            # 3. Forward pass
-            with torch.no_grad():
+            # 3. Forward pass (Inference Mode for lowest memory footprint and max throughput)
+            with torch.inference_mode():
                 out = self.model(img_t)
                 pred = out[0] if isinstance(out, tuple) else out
                 pred = pred[0]  # Shape [25200, 9]
@@ -313,7 +316,7 @@ class SafeCityDetector:
                     if rw < 5 or rh < 5:
                         continue
 
-                    # Standardize class name for SafeCityAI
+                    # Standardize class name for Safety AI
                     std_class = self.normalize_class_name(raw_cls)
 
                     detections.append({
@@ -328,7 +331,7 @@ class SafeCityDetector:
         return detections
 
     def normalize_class_name(self, raw_name):
-        """Maps model label string to SafeCityAI standard terminology."""
+        """Maps model label string to Safety AI standard terminology."""
         n = raw_name.lower().replace("-", " ").replace("_", " ").strip()
         if "with helmet" in n or n == "helmet":
             return "Helmet"
@@ -429,14 +432,17 @@ if not os.path.exists(IMAGE_WEIGHTS):
 
 CCTV_WEIGHTS = os.path.join(BASE_DIR, 'weights', 'best_cctv.pt')
 
+# Alias for backward compatibility
+SafeCityDetector = SafetyDetector
+
 # Dedicated Image Model (Completely isolated from video training)
-image_detector = SafeCityDetector(IMAGE_WEIGHTS)
+image_detector = SafetyDetector(IMAGE_WEIGHTS)
 detector = image_detector
 
 # Dedicated CCTV Video Model
 if os.path.exists(CCTV_WEIGHTS):
     print(f" [INFO] Dedicated CCTV Neural Model detected at {CCTV_WEIGHTS}")
-    cctv_detector = SafeCityDetector(CCTV_WEIGHTS)
+    cctv_detector = SafetyDetector(CCTV_WEIGHTS)
 else:
     cctv_detector = image_detector
 

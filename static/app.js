@@ -1,5 +1,5 @@
 /**
- * SafeCityAI - Contrôleur Principal du Dashboard
+ * Safety AI - Contrôleur Principal du Dashboard
  * Gestion des modes (Image vs Caméra), Inférence Neuronale YOLOv5,
  * Découpage dynamique des preuves visuelles (Crops), ALPR OCR et télémétrie CCTV.
  */
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             th_coordinates: "Coordonnées [x, y, l, h]",
             th_status: "Qualification",
             json_accordion_title: "🔧 Charge Utile JSON Brute (POST /api/detect)",
-            footer_copyright: "© 2026 SafeCityAI - Système Autonome de Détection et Sécurité Routière / Autonomous Road Safety & Traffic Enforcement System. Tous droits réservés / All rights reserved.",
+            footer_copyright: "© 2026 Safety AI - Système Autonome de Détection et Sécurité Routière / Autonomous Road Safety & Traffic Enforcement System. Tous droits réservés / All rights reserved.",
             footer_author: "Auteur & Développeur / Developer : <strong>ratovoarisoaricardo</strong> • Projet Vision par Ordinateur / Computer Vision Engineering Minor Project • Architecture Double-Modèle YOLOv5 (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR."
         },
         en: {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             th_coordinates: "Coordinates [x, y, w, h]",
             th_status: "Status",
             json_accordion_title: "🔧 Raw JSON Payload (POST /api/detect)",
-            footer_copyright: "© 2026 SafeCityAI - Autonomous Road Safety & Traffic Enforcement System. All rights reserved.",
+            footer_copyright: "© 2026 Safety AI - Autonomous Road Safety & Traffic Enforcement System. All rights reserved.",
             footer_author: "Author & Developer: <strong>ratovoarisoaricardo</strong> • Computer Vision Engineering Minor Project • Dual-Model YOLOv5 (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR."
         }
     };
@@ -994,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const penText = rPenalty ? rPenalty.textContent : '';
 
             const textToCopy = isFr ? `=====================================================
-RAPPORT OFFICIEL DE CONSTATATION - SAFECITYAI
+RAPPORT OFFICIEL DE CONSTATATION - SAFETY AI
 =====================================================
 Fichier Image  : ${scanFilenameTag.textContent}
 Date & Heure   : ${new Date().toLocaleString('fr-FR')}
@@ -1006,7 +1006,7 @@ Plaque Immat   : ${rPlateStatus.textContent}
 Moteur IA      : YOLOv5 (best_image.pt) + ALPR EasyOCR Multirégional
 Statut Dossier : Prêt pour transmission
 =====================================================` : `=====================================================
-OFFICIAL ENFORCEMENT REPORT - SAFECITYAI
+OFFICIAL ENFORCEMENT REPORT - SAFETY AI
 =====================================================
 Image File     : ${scanFilenameTag.textContent}
 Date & Time    : ${new Date().toLocaleString('en-US')}
@@ -1036,13 +1036,13 @@ Dossier Status : Ready for submission
             const penText = rPenalty ? rPenalty.textContent : '';
 
             const content = isFr 
-                ? `DOSSIER DE PREUVES NUMÉRIQUES SAFECITYAI\n\nImage source: ${scanFilenameTag.textContent}\nHorodatage: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nCadre juridique: ${jurText}\nSanction: ${penText}\nDescription: ${verdictDescription.textContent}\nImmatriculation relevée: ${plateTextVal.textContent}\n\nObjets détectés:\n${JSON.stringify(currentDetections, null, 2)}`
-                : `SAFECITYAI DIGITAL EVIDENCE DOSSIER\n\nSource Image: ${scanFilenameTag.textContent}\nTimestamp: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nLegal Framework: ${jurText}\nPenalty: ${penText}\nDescription: ${verdictDescription.textContent}\nPlate Extracted: ${plateTextVal.textContent}\n\nDetected Targets:\n${JSON.stringify(currentDetections, null, 2)}`;
+                ? `DOSSIER DE PREUVES NUMÉRIQUES SAFETY AI\n\nImage source: ${scanFilenameTag.textContent}\nHorodatage: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nCadre juridique: ${jurText}\nSanction: ${penText}\nDescription: ${verdictDescription.textContent}\nImmatriculation relevée: ${plateTextVal.textContent}\n\nObjets détectés:\n${JSON.stringify(currentDetections, null, 2)}`
+                : `SAFETY AI DIGITAL EVIDENCE DOSSIER\n\nSource Image: ${scanFilenameTag.textContent}\nTimestamp: ${new Date().toISOString()}\nVerdict: ${verdictTitle.textContent}\nLegal Framework: ${jurText}\nPenalty: ${penText}\nDescription: ${verdictDescription.textContent}\nPlate Extracted: ${plateTextVal.textContent}\n\nDetected Targets:\n${JSON.stringify(currentDetections, null, 2)}`;
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `safecity_report_${Date.now()}.txt`;
+            a.download = `safety_report_${Date.now()}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         });

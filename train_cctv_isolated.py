@@ -1,5 +1,5 @@
 # ==============================================================================
-# SafeCityAI - Script d'Entraînement Isolé & Sécurisé pour Caméra CCTV
+# Safety AI - Script d'Entraînement Isolé & Sécurisé pour Caméra CCTV
 # Ce script garantit que le modèle 'best_image.pt' ne sera JAMAIS touché ni écrasé.
 # ==============================================================================
 

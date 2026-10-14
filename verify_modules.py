@@ -12,7 +12,7 @@ if sys.stdout.encoding != 'utf-8':
         pass
 
 print("=" * 65)
-print(" SAFECITYAI - AUDIT & VÉRIFICATION TECHNIQUE DES MODULES")
+print(" SAFETY AI - AUDIT & VÉRIFICATION TECHNIQUE DES MODULES")
 print("=" * 65)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

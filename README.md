@@ -1,8 +1,8 @@
-# 🚦 SafeCityAI — Autonomous Road Safety & AI Traffic Enforcement Console
+# 🚦 Safety AI — Autonomous Road Safety & AI Traffic Enforcement Console
 
 <div align="center">
 
-  <img src="static/samples/sample_03.png" alt="SafeCityAI Preview Snapshot" width="760" style="border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.45);"/>
+  <img src="static/samples/sample_03.png" alt="Safety AI Preview Snapshot" width="760" style="border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.45);"/>
 
   <br/><br/>
 
@@ -55,7 +55,7 @@
 
 ## 🌟 Project Highlights
 
-**SafeCityAI** is an autonomous smart-city traffic surveillance and enforcement system designed for law enforcement agencies, municipal transportation departments, and road safety regulators.
+**Safety AI** is an autonomous smart-city traffic surveillance and enforcement system designed for law enforcement agencies, municipal transportation departments, and road safety regulators.
 
 The platform processes high-resolution photographic evidence and live video streams to intercept road safety violations in real time (e.g., failure to wear mandatory safety helmets on motorized two-wheelers), harvests zoomed forensic proof cutouts, performs on-premise Automatic License Plate Recognition (ALPR), and formats ready-to-issue official legal citations.
 
@@ -69,7 +69,7 @@ The platform processes high-resolution photographic evidence and live video stre
 
 ## 🧠 Dual-Model Deep Learning Architecture
 
-To eliminate the classic tradeoff between high-resolution forensic accuracy and real-time streaming frame rates, SafeCityAI decouples static analysis from continuous streaming:
+To eliminate the classic tradeoff between high-resolution forensic accuracy and real-time streaming frame rates, Safety AI decouples static analysis from continuous streaming:
 
 ```
                         Incoming Media Stream (Photo or CCTV Video)
@@ -110,7 +110,7 @@ To eliminate the classic tradeoff between high-resolution forensic accuracy and 
 
 ## 🔄 End-to-End 8-Stage Processing Pipeline
 
-SafeCityAI executes an 8-stage pipeline from optical media ingestion to citation delivery:
+Safety AI executes an 8-stage pipeline from optical media ingestion to citation delivery:
 
 ```mermaid
 flowchart TD
@@ -202,7 +202,7 @@ When an infraction is spotted in live surveillance, the operator clicks **"📸 
 
 ## 🌍 Multi-Regional Legal Framework & ALPR Formats
 
-SafeCityAI features a multi-regional compliance engine that adapts legal statutory citations, currency, fine schedules, and plate regex patterns on the fly:
+Safety AI features a multi-regional compliance engine that adapts legal statutory citations, currency, fine schedules, and plate regex patterns on the fly:
 
 | Jurisdiction | Flag | Statutory Reference | Standard Fine | Plate Format Example | Cantons / States |
 | :--- | :---: | :--- | :--- | :--- | :--- |
@@ -283,7 +283,7 @@ The repository includes a ready-to-run notebook: [`notebooks/SafeCityAI_YOLOv5.i
    ```
 6. Download the resulting weights from `runs/train/exp/weights/best.pt`.
 
-### Step 3: Deploy to SafeCityAI
+### Step 3: Deploy to Safety AI
 Copy the downloaded `best.pt` into `safecity-ai/weights/best_image.pt` (or `best_cctv.pt`) and restart the server:
 ```bash
 python server.py
@@ -483,7 +483,7 @@ python client_test.py
 Distributed under the open-source **MIT License**. See [LICENSE](LICENSE) for details.
 
 ```text
-© 2026 SafeCityAI - Autonomous Road Safety & AI Traffic Enforcement Platform.
+© 2026 Safety AI - Autonomous Road Safety & AI Traffic Enforcement Platform.
 All rights reserved.
 
 Author & Developer: ratovoarisoaricardo (Ratovoarisoa Mendrika Manjaka Ricardo)

@@ -1,5 +1,5 @@
 # ==============================================================================
-# SafeCityAI - Automatic License Plate Recognition (ALPR) & Smart OCR Engine
+# Safety AI - Automatic License Plate Recognition (ALPR) & Smart OCR Engine
 # Module universel de lecture optique et d'auto-détection intelligente du pays
 # ==============================================================================
 

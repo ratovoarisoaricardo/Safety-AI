@@ -1,4 +1,4 @@
-# SafeCityAI - Architecture des Bases de Données (Datasets)
+# Safety AI - Architecture des Bases de Données (Datasets)
 
 Pour éviter tout conflit ou perte de modèle, les bases de données sont rigoureusement séparées :
 

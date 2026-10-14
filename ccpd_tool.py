@@ -1,5 +1,5 @@
 # ==============================================================================
-# SafeCityAI - CCPD License Plate Dataset Parser & Converter
+# Safety AI - CCPD License Plate Dataset Parser & Converter
 # Convertisseur officiel du dataset CCPD (https://github.com/detectRecog/CCPD)
 # ==============================================================================
 

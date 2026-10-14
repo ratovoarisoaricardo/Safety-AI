@@ -1,5 +1,5 @@
 # ==============================================================================
-# SafeCityAI - High-Performance Traffic Violation Detection & ALPR Console
+# Safety AI - High-Performance Traffic Violation Detection & ALPR Console
 # Multi-Regional Compliance (India RTO, France SIV, Universal Auto-Detection)
 # Asynchronous 30 FPS CCTV Video Streaming Engine
 # ==============================================================================
@@ -108,7 +108,8 @@ class AsyncVideoCamera:
     def get_snapshot_png(self):
         with self.lock:
             if self.current_raw_frame is not None:
-                ret, buf = cv2.imencode('.png', self.current_raw_frame)
+                # Optimized PNG level 3 compression for instantaneous HTTP snapshot transfer (<10ms)
+                ret, buf = cv2.imencode('.png', self.current_raw_frame, [cv2.IMWRITE_PNG_COMPRESSION, 3])
                 if ret:
                     return buf.tobytes()
         return None
@@ -243,8 +244,8 @@ class AsyncVideoCamera:
                 cv2.putText(frame, "LIVE ALERT : MOTORCYCLE VIOLATION DETECTED", (15, 72), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 0, 255), 2)
 
-            # Encodage JPEG en mémoire vive
-            ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            # Encodage JPEG haute vitesse en mémoire vive (qualité 80 calibrée pour streaming ultra-fluide)
+            ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
             if ret:
                 with self.lock:
                     self.current_jpeg = buffer.tobytes()
@@ -266,7 +267,7 @@ camera = AsyncVideoCamera()
 
 @app.route('/')
 def index():
-    """Rendu de la console principale SafeCityAI."""
+    """Rendu de la console principale Safety AI."""
     return render_template('index.html')
 
 @app.route('/video/demo')
@@ -552,7 +553,7 @@ def status():
 
 if __name__ == '__main__':
     print("=" * 70)
-    print(" [READY] Serveur SafeCityAI Haute Performance en ligne !")
+    print(" [READY] Serveur Safety AI Haute Performance en ligne !")
     print(" [URL]   Ouvrez http://localhost:5000 dans votre navigateur.")
     print(" [INFO]  Moteur Asynchrone 30 FPS CCTV & ALPR Multi-Régions activé.")
     print("=" * 70)

@@ -1,7 +1,7 @@
 @echo off
-title SafeCityAI - Launching Dashboard and API
+title Safety AI - Launching Dashboard and API
 echo ===================================================
-echo               SafeCityAI Deployment
+echo               Safety AI Deployment
 echo ===================================================
 echo.
 

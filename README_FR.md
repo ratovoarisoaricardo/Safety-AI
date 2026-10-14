@@ -1,8 +1,8 @@
-# 🚦 SafeCityAI — Console Autonome de Sécurité Routière & Détection d'Infractions
+# 🚦 Safety AI — Console Autonome de Sécurité Routière & Détection d'Infractions
 
 <div align="center">
 
-  <img src="static/samples/sample_03.png" alt="SafeCityAI Preview Snapshot" width="720" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);"/>
+  <img src="static/samples/sample_03.png" alt="Safety AI Preview Snapshot" width="720" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);"/>
 
   <br/><br/>
 
@@ -55,7 +55,7 @@
 
 ## 🇫🇷 Présentation du Projet
 
-**SafeCityAI** est une console de surveillance et de verbalisation automatisée conçue pour les services de sécurité routière, les forces de l'ordre et les municipalités intelligentes (*Smart Cities*).
+**Safety AI** est une console de surveillance et de verbalisation automatisée conçue pour les services de sécurité routière, les forces de l'ordre et les municipalités intelligentes (*Smart Cities*).
 
 Le système analyse les flux de circulation urbains pour intercepter en temps réel les infractions au Code de la Route (défaut de port du casque de protection obligatoire), isoler automatiquement les preuves photographiques par recadrage haute résolution, lire les plaques d'immatriculation (ALPR OCR) et générer instantanément un procès-verbal officiel prêt à l'emploi.
 
@@ -77,7 +77,7 @@ Le système analyse les flux de circulation urbains pour intercepter en temps r�
 
 ## 🧠 Architecture Double-Modèle & ALPR
 
-Pour garantir une précision maximale et éviter les compromis entre résolution photo et fluidité vidéo, SafeCityAI exploite une architecture neuronale découplée :
+Pour garantir une précision maximale et éviter les compromis entre résolution photo et fluidité vidéo, Safety AI exploite une architecture neuronale découplée :
 
 ```
                         Flux Entrant (Photo ou Vidéo CCTV)
@@ -118,7 +118,7 @@ Pour garantir une précision maximale et éviter les compromis entre résolution
 
 ## 🔄 Workflow Complet de Bout en Bout / End-to-End Pipeline
 
-SafeCityAI orchestre une chaîne de traitement complète en **8 étapes séquentielles** :
+Safety AI orchestre une chaîne de traitement complète en **8 étapes séquentielles** :
 
 ```mermaid
 flowchart TD
@@ -368,7 +368,7 @@ Fournit la frame courante non compressée en PNG pour analyse immédiate dans le
 Distribué sous la licence open-source **MIT**. Consultez [LICENSE](LICENSE) pour plus de détails.
 
 ```text
-© 2026 SafeCityAI - Autonomous Road Safety & AI Traffic Enforcement Platform.
+© 2026 Safety AI - Autonomous Road Safety & AI Traffic Enforcement Platform.
 Auteur & Développeur : ratovoarisoaricardo (Ratovoarisoa Mendrika Manjaka Ricardo)
 Architecture Double-Modèle YOLOv5 (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR.
 ```
