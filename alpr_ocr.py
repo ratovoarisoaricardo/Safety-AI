@@ -28,7 +28,9 @@ INDIAN_STATE_CODES = {
 REGIONAL_PROFILES = {
     'CH': {
         'code': 'CH',
-        'name': 'Suisse / Switzerland (CH)',
+        'name': 'Switzerland (Fedro / ASTRA)',
+        'name_en': 'Switzerland (Fedro / ASTRA)',
+        'name_fr': 'Suisse (OFROU / LCR)',
         'flag': '🇨🇭',
         'law_article_fr': 'Article 3b de l\'Ordonnance sur les règles de la circulation routière (OCR / LCR)',
         'law_article_en': 'Article 3b of the Swiss Traffic Regulations Ordinance (OCR / SVG)',
@@ -41,7 +43,9 @@ REGIONAL_PROFILES = {
     },
     'IN': {
         'code': 'IN',
-        'name': 'Inde / India (RTO)',
+        'name': 'India (Parivahan / RTO)',
+        'name_en': 'India (Parivahan / RTO)',
+        'name_fr': 'Inde (RTO / Parivahan)',
         'flag': '🇮🇳',
         'law_article_fr': 'Section 129 de l\'Indian Motor Vehicles Act (1988/2019)',
         'law_article_en': 'Section 129, Indian Motor Vehicles Act (1988/2019)',
@@ -54,7 +58,9 @@ REGIONAL_PROFILES = {
     },
     'FR': {
         'code': 'FR',
-        'name': 'France / Europe (SIV)',
+        'name': 'France (SIV / Highway Code)',
+        'name_en': 'France (SIV / Highway Code)',
+        'name_fr': 'France (SIV / Code de la Route)',
         'flag': '🇫🇷',
         'law_article_fr': 'Article R431-1 du Code de la Route Français',
         'law_article_en': 'Article R431-1 of the French Highway Code',
@@ -67,7 +73,9 @@ REGIONAL_PROFILES = {
     },
     'VN': {
         'code': 'VN',
-        'name': 'Vietnam (Standard 2 Lignes)',
+        'name': 'Vietnam (Standard 2-Line)',
+        'name_en': 'Vietnam (Standard 2-Line)',
+        'name_fr': 'Vietnam (Standard 2 Lignes)',
         'flag': '🇻🇳',
         'law_article_fr': 'Nghị định 100/2019/NĐ-CP (Code Routier Vietnamien)',
         'law_article_en': 'Decree 100/2019/ND-CP (Traffic Safety Regulation)',
@@ -80,7 +88,9 @@ REGIONAL_PROFILES = {
     },
     'GLOBAL': {
         'code': 'GLOBAL',
-        'name': 'International (Convention de Vienne)',
+        'name': 'International (Vienna Convention)',
+        'name_en': 'International (Vienna Convention)',
+        'name_fr': 'International (Convention de Vienne)',
         'flag': '🌍',
         'law_article_fr': 'Convention de Vienne sur la circulation routière (Art. 3 & Sécurité des 2-roues)',
         'law_article_en': 'Vienna Convention on Road Traffic (Article 3 - Driver Safety Compliance)',
@@ -211,7 +221,7 @@ class LicensePlateOCR:
             target_reg = 'IN' if active_target in ('AUTO', 'IN') else active_target
             prof = REGIONAL_PROFILES.get(target_reg, REGIONAL_PROFILES['GLOBAL'])
             return {
-                "text": "PLAQUE NON VISIBLE",
+                "text": "PLATE NOT VISIBLE",
                 "region": target_reg,
                 "region_name": prof['name'],
                 "flag": prof['flag'],
@@ -350,8 +360,8 @@ class LicensePlateOCR:
             detected_country = active_target if active_target != 'AUTO' else 'GLOBAL'
             prof = REGIONAL_PROFILES.get(detected_country, REGIONAL_PROFILES['GLOBAL'])
             
-            # Ne JAMAIS inventer une plaque indienne sur une photo arbitraire
-            final_text = "PLAQUE NON LISIBLE"
+            # Do NOT fabricate a default plate on an arbitrary image
+            final_text = "PLATE NOT READABLE"
             is_low_res = True
             method = "unreadable_low_res"
 

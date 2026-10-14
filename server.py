@@ -222,13 +222,13 @@ class AsyncVideoCamera:
             # Incrustation télémétrique cybernétique HUD dans le flux
             t_str = time.strftime("%d/%m/%Y %H:%M:%S")
             if is_webcam:
-                cam_label = "DIRECT WEBCAM PHYSIQUE [CAPTEUR REEL EN DIRECT]"
+                cam_label = "DIRECT PHYSICAL WEBCAM [LIVE SENSOR]"
             elif 'saigon' in str(target_source).lower():
-                cam_label = "CAM-01 CCTV [CARREFOUR URBAIN REEL 1080p]"
+                cam_label = "CAM-01 CCTV [URBAN INTERSECTION 1080p]"
             elif 'motorcycle_real' in str(target_source).lower():
-                cam_label = "CAM-02 CCTV [VOIE CIRCULATION REELLE 1080p]"
+                cam_label = "CAM-02 CCTV [LIVE TRAFFIC LANE 1080p]"
             elif 'cars' in str(target_source).lower():
-                cam_label = "CAM-03 CCTV [SURVEILLANCE AUTOROUTE]"
+                cam_label = "CAM-03 CCTV [HIGHWAY SURVEILLANCE]"
             else:
                 cam_label = f"CCTV [{os.path.basename(str(target_source))}]"
 
@@ -236,11 +236,11 @@ class AsyncVideoCamera:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 240, 255), 2)
 
             fps_display = min(self.current_fps, 30.0)
-            status_text = f"IA ENGINE : best_cctv.pt | {fps_display:.1f} FPS"
+            status_text = f"AI ENGINE : best_cctv.pt | {fps_display:.1f} FPS"
             cv2.putText(frame, status_text, (15, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 255, 0), 2)
 
             if violation_found:
-                cv2.putText(frame, "ALERTE EN DIRECT : INFRACTION MOTARD DETECTEE", (15, 72), 
+                cv2.putText(frame, "LIVE ALERT : MOTORCYCLE VIOLATION DETECTED", (15, 72), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 0, 255), 2)
 
             # Encodage JPEG en mémoire vive
@@ -330,8 +330,8 @@ def set_cctv_video():
     data = request.get_json(silent=True) or {}
     video_file = data.get('video', 'saigon_part.webm')
     success = camera.set_video_file(video_file)
-    disp_name = "🔴 Caméra PC / Webcam Physique" if str(camera.video_path) == "0" else (
-        f"🌐 Flux Réseau ({camera.video_path})" if str(camera.video_path).startswith(('rtsp://', 'http://', 'https://'))
+    disp_name = "🔴 Physical PC Webcam" if str(camera.video_path) == "0" else (
+        f"🌐 Network Stream ({camera.video_path})" if str(camera.video_path).startswith(('rtsp://', 'http://', 'https://'))
         else os.path.basename(str(camera.video_path))
     )
     return jsonify({
@@ -430,7 +430,7 @@ def detect():
         reg_prof = REGIONAL_PROFILES.get(target_reg, REGIONAL_PROFILES['GLOBAL'])
 
         # Détermination stricte de la plaque : Ne JAMAIS inventer une fausse plaque !
-        if detected_plate_info and detected_plate_info.get('text') not in ("PLAQUE NON VISIBLE", "PLAQUE NON LISIBLE", None):
+        if detected_plate_info and detected_plate_info.get('text') not in ("PLAQUE NON VISIBLE", "PLAQUE NON LISIBLE", "PLATE NOT VISIBLE", "PLATE NOT READABLE", None):
             detected_plate_text = detected_plate_info['text']
             has_plate = True
         else:
@@ -444,8 +444,9 @@ def detect():
             max_conf = max([v.get('confidence', 0.9) for v in violations]) if violations else 0.92
             verdict = {
                 "status": "VIOLATION",
-                "label": f"INFRACTION DÉTECTÉE : CONDUCTEUR SANS CASQUE ({reg_prof['flag']} {reg_prof['name']})",
-                "severity": "CRITIQUE",
+                "label": f"TRAFFIC VIOLATION DETECTED : RIDER WITHOUT HELMET ({reg_prof['flag']} {reg_prof['name']})",
+                "label_fr": f"INFRACTION DÉTECTÉE : CONDUCTEUR SANS CASQUE ({reg_prof['flag']} {reg_prof.get('name_fr', reg_prof['name'])})",
+                "severity": "CRITICAL",
                 "color": "#ef4444",
                 "confidence": round(max_conf, 3),
                 "plate": detected_plate_text,
@@ -458,15 +459,18 @@ def detect():
                 "penalty_fr": reg_prof['penalty_fr'],
                 "penalty_en": reg_prof['penalty_en'],
                 "currency": reg_prof['currency'],
-                "summary": f"Infraction constatée au {reg_prof['law_article_fr']}. {reg_prof['penalty_fr']}",
-                "action": "Avis de contravention officiel généré avec dossier de preuves numériques rattaché."
+                "summary": f"Violation recorded under {reg_prof['law_article_en']}. {reg_prof['penalty_en']}",
+                "summary_fr": f"Infraction constatée au {reg_prof['law_article_fr']}. {reg_prof['penalty_fr']}",
+                "action": "Official violation notice generated with attached digital evidence dossier.",
+                "action_fr": "Avis de contravention officiel généré avec dossier de preuves numériques rattaché."
             }
         elif is_compliant:
             max_conf = max([h.get('confidence', 0.9) for h in helmets]) if helmets else 0.95
             verdict = {
                 "status": "COMPLIANT",
-                "label": f"CONFORME : CASQUE DE PROTECTION HOMOLOGUÉ ({reg_prof['flag']} {reg_prof['name']})",
-                "severity": "CONFORME",
+                "label": f"COMPLIANT STATUS : APPROVED SAFETY HELMET VERIFIED ({reg_prof['flag']} {reg_prof['name']})",
+                "label_fr": f"CONFORME : CASQUE DE PROTECTION HOMOLOGUÉ ({reg_prof['flag']} {reg_prof.get('name_fr', reg_prof['name'])})",
+                "severity": "COMPLIANT",
                 "color": "#10b981",
                 "confidence": round(max_conf, 3),
                 "plate": detected_plate_text,
@@ -479,14 +483,17 @@ def detect():
                 "penalty_fr": "Aucune infraction constatée sur ce contrôle.",
                 "penalty_en": "No infraction recorded during this inspection.",
                 "currency": reg_prof['currency'],
-                "summary": f"Conducteur équipé d'un équipement réglementaire conforme ({reg_prof['name']}).",
-                "action": "Contrôle clôturé avec mention Conforme - Données statistiques archivées."
+                "summary": f"Rider equipped with approved safety helmet ({reg_prof['name']}).",
+                "summary_fr": f"Conducteur équipé d'un équipement réglementaire conforme ({reg_prof.get('name_fr', reg_prof['name'])}).",
+                "action": "Inspection concluded: Compliant status logged into telemetry archive.",
+                "action_fr": "Contrôle clôturé avec mention Conforme - Données statistiques archivées."
             }
         else:
             verdict = {
                 "status": "OBSERVATION",
-                "label": f"SURVEILLANCE ROUTIÈRE : SCÈNE SOUS CONTRÔLE ({reg_prof['flag']} {reg_prof['name']})",
-                "severity": "INFORMATIF",
+                "label": f"ROADWAY SURVEILLANCE : SCENE UNDER OBSERVATION ({reg_prof['flag']} {reg_prof['name']})",
+                "label_fr": f"SURVEILLANCE ROUTIÈRE : SCÈNE SOUS CONTRÔLE ({reg_prof['flag']} {reg_prof.get('name_fr', reg_prof['name'])})",
+                "severity": "INFORMATIVE",
                 "color": "#00f0ff",
                 "confidence": 0.88,
                 "plate": detected_plate_text,
@@ -499,8 +506,10 @@ def detect():
                 "penalty_fr": "Surveillance standard maintenue.",
                 "penalty_en": "Standard surveillance active.",
                 "currency": reg_prof['currency'],
-                "summary": f"{len(detections)} élément(s) relevé(s) lors du balayage optique de la scène.",
-                "action": "Surveillance préventive maintenue."
+                "summary": f"{len(detections)} target(s) logged during optical sweep.",
+                "summary_fr": f"{len(detections)} élément(s) relevé(s) lors du balayage optique de la scène.",
+                "action": "Preventive surveillance active.",
+                "action_fr": "Surveillance préventive maintenue."
             }
 
         return jsonify({

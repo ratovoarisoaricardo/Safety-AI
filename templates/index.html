@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeCityAI - Console de Surveillance Routière & Détection d'Infractions</title>
-    <meta name="description" content="Plateforme intelligente de détection d'infractions routières : défaut de casque, non-port de ceinture, reconnaissance de plaques ALPR par YOLOv5 et OCR.">
+    <title>SafeCityAI - Autonomous Road Safety & AI Traffic Violation Enforcement Console</title>
+    <meta name="description" content="Intelligent traffic enforcement platform: helmet violation detection, seatbelt compliance, multi-regional ALPR OCR powered by YOLOv5.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,69 +22,69 @@
     <header class="app-header">
         <div class="header-container">
             <div class="brand">
-                <span class="badge-live" data-i18n="badge_live">DIRECT ACTIF</span>
+                <span class="badge-live" data-i18n="badge_live">LIVE ACTIVE</span>
                 <h1 class="brand-title">SafeCity<span>AI</span></h1>
-                <p class="brand-subtitle" data-i18n="brand_subtitle">Console Autonome de Sécurité Routière & Verbalisation par IA</p>
+                <p class="brand-subtitle" data-i18n="brand_subtitle">Autonomous Road Safety & AI Traffic Violation Enforcement Console</p>
             </div>
             
             <div class="header-right">
-                <div class="engine-status" id="engineStatusCard" title="Système double modèle avec protection lecture-seule">
+                <div class="engine-status" id="engineStatusCard" title="Dual-model neural system with read-only integrity protection">
                     <div class="status-dot pulses" id="statusDot"></div>
-                    <span class="status-text" id="statusText">Initialisation des moteurs IA...</span>
+                    <span class="status-text" id="statusText">Initializing AI neural engines...</span>
                 </div>
-                <div class="region-switch-container" aria-label="Juridiction et Format Routier" title="Sélecteur de Juridiction et Format de Plaque">
-                    <button class="region-btn active" id="regionBtnAuto" data-region="AUTO" title="Auto-Détection Automatique selon l'image">🌍 Auto</button>
-                    <button class="region-btn" id="regionBtnCh" data-region="CH" title="Réglementation Suisse (LCR / OCR Art. 3b)">🇨🇭 Suisse</button>
-                    <button class="region-btn" id="regionBtnFr" data-region="FR" title="Réglementation France (SIV / Code de la Route)">🇫🇷 France</button>
-                    <button class="region-btn" id="regionBtnIn" data-region="IN" title="Réglementation Inde (RTO / Motor Vehicles Act)">🇮🇳 Inde</button>
+                <div class="region-switch-container" aria-label="Jurisdiction and Roadway Format" title="Jurisdiction and Plate Format Selector">
+                    <button class="region-btn active" id="regionBtnAuto" data-region="AUTO" title="Universal Automatic Detection">🌍 Auto</button>
+                    <button class="region-btn" id="regionBtnCh" data-region="CH" title="Switzerland Traffic Regulations (LCR / ASTRA)">🇨🇭 Suisse</button>
+                    <button class="region-btn" id="regionBtnFr" data-region="FR" title="France Highway Code (SIV / Code de la Route)">🇫🇷 France</button>
+                    <button class="region-btn" id="regionBtnIn" data-region="IN" title="India Motor Vehicles Act (RTO / Parivahan)">🇮🇳 Inde</button>
                 </div>
                 <div class="lang-switch-container" aria-label="Language selector">
-                    <button class="lang-btn active" id="langBtnFr" data-lang="fr" title="Passer en Français">🇫🇷 FR</button>
-                    <button class="lang-btn" id="langBtnEn" data-lang="en" title="Switch to English">🇬🇧 EN</button>
+                    <button class="lang-btn" id="langBtnFr" data-lang="fr" title="Passer en Français">🇫🇷 FR</button>
+                    <button class="lang-btn active" id="langBtnEn" data-lang="en" title="Switch to English">🇬🇧 EN</button>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="app-main">
-        <!-- KPIs Bandeau supérieur -->
-        <section class="stats-deck" aria-label="Indicateurs Clés de Performance">
+        <!-- KPIs Top Deck -->
+        <section class="stats-deck" aria-label="Key Performance Indicators">
             <div class="stat-card">
-                <span class="stat-label" data-i18n="kpi_model_accuracy">Précision Modèle (mAP@0.5)</span>
+                <span class="stat-label" data-i18n="kpi_model_accuracy">Model Accuracy (mAP@0.5)</span>
                 <span class="stat-value text-cyan">92.4%</span>
                 <div class="stat-progress-bar"><div class="progress" style="width: 92.4%"></div></div>
-                <span class="stat-sub" data-i18n="kpi_model_sub">Modèle spécialisé Photos & CCTV</span>
+                <span class="stat-sub" data-i18n="kpi_model_sub">Specialized for Photos & CCTV</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label" data-i18n="kpi_helmet_rate">Taux de Détection Casque</span>
+                <span class="stat-label" data-i18n="kpi_helmet_rate">Helmet Detection Rate</span>
                 <span class="stat-value text-emerald">94.8%</span>
                 <div class="stat-progress-bar"><div class="progress bg-emerald" style="width: 94.8%"></div></div>
-                <span class="stat-sub" data-i18n="kpi_helmet_sub">Conformité motards urbains</span>
+                <span class="stat-sub" data-i18n="kpi_helmet_sub">Urban motorcycle compliance</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label" data-i18n="kpi_violations_today">Infractions Relevées Aujourd'hui</span>
+                <span class="stat-label" data-i18n="kpi_violations_today">Violations Recorded Today</span>
                 <span class="stat-value text-red" id="totalViolationsCounter">1,482</span>
-                <span class="stat-sub" data-i18n="kpi_violations_sub">Surveillance active secteur urbain</span>
+                <span class="stat-sub" data-i18n="kpi_violations_sub">Active monitoring in urban sector</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label" data-i18n="kpi_alpr_module">Module ALPR (Plaques)</span>
-                <span class="stat-value text-amber" data-i18n="kpi_alpr_active">OCR Actif</span>
+                <span class="stat-label" data-i18n="kpi_alpr_module">ALPR Module (Plates)</span>
+                <span class="stat-value text-amber" data-i18n="kpi_alpr_active">OCR Active</span>
                 <div class="stat-progress-bar"><div class="progress bg-amber" style="width: 96%"></div></div>
-                <span class="stat-sub" data-i18n="kpi_alpr_sub">Reconnaissance optique automatique</span>
+                <span class="stat-sub" data-i18n="kpi_alpr_sub">Automatic optical recognition</span>
             </div>
         </section>
 
-        <!-- Sélecteur de Mode Principal (Séparation Nette Image vs Caméra) -->
-        <nav class="mode-navigation-bar" aria-label="Sélecteur de mode de surveillance">
+        <!-- Main Mode Switcher (Clean Separation: Image vs Camera) -->
+        <nav class="mode-navigation-bar" aria-label="Surveillance mode selector">
             <button class="mode-tab-btn active" id="tabModeImage" data-mode="image">
                 <div class="tab-btn-glow"></div>
                 <div class="tab-btn-icon">📸</div>
                 <div class="tab-btn-content">
                     <div class="tab-btn-header">
-                        <span class="tab-btn-title" data-i18n="tab_image_title">Mode Analyse Image</span>
-                        <span class="tab-pill pill-blue" data-i18n="tab_image_pill">Contrôle Cliché</span>
+                        <span class="tab-btn-title" data-i18n="tab_image_title">Image Analysis Mode</span>
+                        <span class="tab-pill pill-blue" data-i18n="tab_image_pill">Snapshot Inspection</span>
                     </div>
-                    <span class="tab-btn-subtitle" data-i18n="tab_image_sub">Scan haute définition, verdict légal & preuves visuelles découpées</span>
+                    <span class="tab-btn-subtitle" data-i18n="tab_image_sub">High-definition scan, legal verdict & visual evidence crops</span>
                 </div>
             </button>
 
@@ -93,24 +93,24 @@
                 <div class="tab-btn-icon">🎥</div>
                 <div class="tab-btn-content">
                     <div class="tab-btn-header">
-                        <span class="tab-btn-title" data-i18n="tab_cctv_title">Mode Vidéosurveillance Caméra</span>
-                        <span class="tab-pill pill-red" data-i18n="tab_cctv_pill">Direct 30 FPS</span>
+                        <span class="tab-btn-title" data-i18n="tab_cctv_title">CCTV Video Surveillance Mode</span>
+                        <span class="tab-pill pill-red" data-i18n="tab_cctv_pill">Live 30 FPS</span>
                     </div>
-                    <span class="tab-btn-subtitle" data-i18n="tab_cctv_sub">Flux continu filtré 100% motos, lecture de plaque & alertes temps réel</span>
+                    <span class="tab-btn-subtitle" data-i18n="tab_cctv_sub">Continuous stream filtered 100% motorcycles, plate reading & live alerts</span>
                 </div>
             </button>
         </nav>
 
         <!-- ============================================================== -->
-        <!-- PANNEAU 1 : MODE ANALYSE IMAGE (SCAN & RÉSULTATS DÉTAILLÉS)      -->
+        <!-- PANEL 1: IMAGE ANALYSIS MODE (SCAN & DETAILED RESULTS)         -->
         <!-- ============================================================== -->
         <section class="mode-panel active" id="modeImagePanel">
             
-            <!-- Zone Avant-Scan (Drop zone & Galerie) -->
+            <!-- Pre-Scan Zone (Drop zone & Gallery) -->
             <div class="scan-input-section" id="scanInputSection">
                 <div class="section-heading">
-                    <h2 data-i18n="scan_heading">📸 Déposer ou Sélectionner une Image Routière pour le Scan</h2>
-                    <p data-i18n="scan_subheading">Téléversez une photo prise par radar ou choisissez un scénario réel de circulation ci-dessous pour déclencher l'analyse neuronale complète.</p>
+                    <h2 data-i18n="scan_heading">📸 Upload or Select a Traffic Image for Scanning</h2>
+                    <p data-i18n="scan_subheading">Upload a camera capture or pick a real traffic scenario below to run complete neural analysis.</p>
                 </div>
 
                 <!-- Drop Zone -->
@@ -119,171 +119,171 @@
                         <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                         </svg>
-                        <p class="drop-text" data-i18n="drop_text">Glissez-déposez une photo ici ou <span>parcourez vos fichiers</span></p>
-                        <p class="drop-subtext" data-i18n="drop_subtext">Formats acceptés : PNG, JPG, JPEG (Haute résolution recommandée)</p>
+                        <p class="drop-text" data-i18n="drop_text">Drag and drop a photo here or <span>browse your files</span></p>
+                        <p class="drop-subtext" data-i18n="drop_subtext">Accepted formats: PNG, JPG, JPEG (High resolution recommended)</p>
                     </div>
                     <input type="file" id="fileInput" accept="image/*" class="file-hidden">
                 </div>
 
-                <!-- Galerie de Tests Rapides -->
+                <!-- Quick Test Gallery -->
                 <div class="gallery-wrapper">
                     <div class="gallery-header">
-                        <h3 data-i18n="gallery_title">Scénarios Réels de Circulation Disponibles (1 Clic) :</h3>
-                        <span class="gallery-badge" data-i18n="gallery_badge">Motos • Casques • Plaques</span>
+                        <h3 data-i18n="gallery_title">Real Traffic Scenarios Available (1 Click):</h3>
+                        <span class="gallery-badge" data-i18n="gallery_badge">Motorcycles • Helmets • Plates</span>
                     </div>
                     <div class="gallery-grid" id="galleryGrid">
-                        <!-- Rempli automatiquement via app.js -->
+                        <!-- Populated dynamically via app.js -->
                     </div>
                 </div>
             </div>
 
-            <!-- Zone Résultats du Scan (Affichée dès qu'une image est soumise) -->
+            <!-- Scan Results Workspace (Visible once image is submitted) -->
             <div class="scan-results-workspace hidden" id="scanResultsWorkspace">
                 
-                <!-- Barre d'en-tête du Scan avec informations et bouton retour -->
+                <!-- Scan Header Bar with Metadata and Reset Button -->
                 <div class="scan-topbar">
                     <div class="scan-meta-info">
                         <span class="meta-tag" id="scanFilenameTag">sample_03.png</span>
                         <span class="meta-tag meta-dim" id="scanDimensionsTag">640 × 480 px</span>
-                        <span class="meta-tag meta-engine">Modèle : YOLOv5 (best_image.pt) + ALPR</span>
+                        <span class="meta-tag meta-engine">Model: YOLOv5 (best_image.pt) + ALPR</span>
                     </div>
                     <div class="scan-top-actions">
-                        <button class="btn btn-secondary btn-sm" id="toggleBoxesBtn" data-i18n="btn_toggle_boxes">👁️ Masquer / Afficher Boîtes</button>
-                        <button class="btn btn-primary btn-sm" id="newScanBtn" data-i18n="btn_new_scan">🔄 Scanner une Autre Image</button>
+                        <button class="btn btn-secondary btn-sm" id="toggleBoxesBtn" data-i18n="btn_toggle_boxes">👁️ Hide / Show Boxes</button>
+                        <button class="btn btn-primary btn-sm" id="newScanBtn" data-i18n="btn_new_scan">🔄 Scan Another Image</button>
                     </div>
                 </div>
 
-                <!-- Grille principale : Image annotée à gauche, Décision & Preuves à droite -->
+                <!-- Main Layout Grid: Annotated Snapshot Left, Decision & Proofs Right -->
                 <div class="scan-detailed-grid">
                     
-                    <!-- Colonne Cliché Annoté -->
+                    <!-- Left: Annotated Visual Snapshot Column -->
                     <div class="scan-visual-column">
                         <div class="visual-card">
                             <div class="visual-card-header">
-                                <h3 data-i18n="visual_card_title">Cliché Routier Annoté par l'IA</h3>
-                                <span class="badge-hud" data-i18n="visual_hud_badge">RÉTICULE NUMÉRIQUE ACTIF</span>
+                                <h3 data-i18n="visual_card_title">AI-Annotated Traffic Snapshot</h3>
+                                <span class="badge-hud" data-i18n="visual_hud_badge">DIGITAL RETICLE ACTIVE</span>
                             </div>
                             <div class="viewer-container" id="viewerContainer">
-                                <img id="sourceImage" alt="Scène routière analysée">
+                                <img id="sourceImage" alt="Analyzed road scene">
                                 <canvas id="detectionCanvas"></canvas>
                             </div>
                             <div class="visual-legend">
-                                <span class="legend-item"><span class="legend-dot dot-red"></span> <span data-i18n="legend_violation">Infraction (Sans casque)</span></span>
-                                <span class="legend-item"><span class="legend-dot dot-green"></span> <span data-i18n="legend_compliant">Conforme (Avec casque)</span></span>
-                                <span class="legend-item"><span class="legend-dot dot-blue"></span> <span data-i18n="legend_rider">Motard (Rider)</span></span>
-                                <span class="legend-item"><span class="legend-dot dot-cyan"></span> <span data-i18n="legend_plate">Plaque Minéralogique</span></span>
+                                <span class="legend-item"><span class="legend-dot dot-red"></span> <span data-i18n="legend_violation">Violation (No Helmet)</span></span>
+                                <span class="legend-item"><span class="legend-dot dot-green"></span> <span data-i18n="legend_compliant">Compliant (Helmet)</span></span>
+                                <span class="legend-item"><span class="legend-dot dot-blue"></span> <span data-i18n="legend_rider">Rider</span></span>
+                                <span class="legend-item"><span class="legend-dot dot-cyan"></span> <span data-i18n="legend_plate">License Plate</span></span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Colonne Compréhension du Scan & Preuves Décortiquées -->
+                    <!-- Right: Scan Decision & Isolated Evidence Column -->
                     <div class="scan-report-column">
                         
-                        <!-- 1. CARTE HERO DE VERDICT GLOBAL -->
+                        <!-- 1. HERO VERDICT BANNER -->
                         <div class="verdict-banner" id="verdictBanner">
                             <div class="verdict-icon" id="verdictIcon">🚨</div>
                             <div class="verdict-body">
                                 <div class="verdict-header-row">
-                                    <span class="verdict-badge" id="verdictBadge">INFRACTION DÉTECTÉE</span>
-                                    <span class="verdict-confidence" id="verdictConfidence">Certitude IA : 94.8%</span>
+                                    <span class="verdict-badge" id="verdictBadge">TRAFFIC VIOLATION DETECTED</span>
+                                    <span class="verdict-confidence" id="verdictConfidence">AI Confidence: 94.8%</span>
                                 </div>
-                                <h3 class="verdict-title" id="verdictTitle">Défaut de Port du Casque de Sécurité</h3>
+                                <h3 class="verdict-title" id="verdictTitle">Failure to Wear Mandatory Safety Helmet</h3>
                                 <p class="verdict-description" id="verdictDescription">
-                                    Le conducteur du deux-roues circule sans casque de protection réglementaire. Infraction constatée avec haut degré de certitude.
+                                    The motorcycle rider is formally identified operating without an approved safety helmet. Violation verified with high confidence.
                                 </p>
                             </div>
                         </div>
 
-                        <!-- 2. VIGNETTES DE PREUVES VISUELLES DÉCOUPÉES (CROPS ZOOMÉS) -->
+                        <!-- 2. ISOLATED VISUAL EVIDENCE CROPS (HIGH-PRECISION ZOOMS) -->
                         <div class="evidence-section">
                             <div class="section-title-row">
-                                <h4 data-i18n="evidence_title">🔍 Preuves Visuelles Découpées (Zooms Haute Précision)</h4>
-                                <span class="title-sub" data-i18n="evidence_sub">Extractions automatiques directes</span>
+                                <h4 data-i18n="evidence_title">🔍 Visual Evidence Crops (High-Precision Zooms)</h4>
+                                <span class="title-sub" data-i18n="evidence_sub">Automatic direct extractions</span>
                             </div>
-                            <p class="evidence-hint" data-i18n="evidence_hint">L'intelligence artificielle a extrait et isolé les zones déterminantes de la photo pour contrôle immédiat :</p>
+                            <p class="evidence-hint" data-i18n="evidence_hint">The artificial intelligence has extracted and isolated key scene regions for immediate verification:</p>
                             
                             <div class="evidence-cards-container" id="evidenceCardsContainer">
-                                <!-- Généré dynamiquement : Crop Casque/Tête, Crop Motard, Crop Plaque -->
+                                <!-- Generated dynamically: Helmet/Head Crop, Rider Crop, Plate Crop -->
                             </div>
                         </div>
 
-                        <!-- 3. CARTOUCHE DE LA PLAQUE D'IMMATRICULATION ALPR -->
+                        <!-- 3. EXTRACTED LICENSE PLATE ALPR CARTRIDGE -->
                         <div class="plate-recognition-card" id="plateRecognitionCard">
                             <div class="plate-card-left">
-                                <span class="plate-label" data-i18n="plate_label">Plaque d'Immatriculation Extraite (ALPR OCR) :</span>
+                                <span class="plate-label" data-i18n="plate_label">Extracted License Plate (ALPR OCR):</span>
                                 <div class="plate-badge-metal" id="plateBadgeMetal">
                                     <span class="plate-country-strip" id="plateCountryStrip">--</span>
                                     <span class="plate-text-val" id="plateTextVal" style="color: #94a3b8;">--</span>
                                 </div>
                             </div>
                             <div class="plate-card-right">
-                                <span class="plate-ocr-status text-muted" id="plateOcrStatus" data-i18n="plate_status_ok">⚪ En attente de scan</span>
-                                <span class="plate-subtext" id="plateSubtext" data-i18n="plate_subtext">Prêt pour transmission au fichier national des véhicules</span>
+                                <span class="plate-ocr-status text-muted" id="plateOcrStatus" data-i18n="plate_status_ok">⚪ Awaiting scan</span>
+                                <span class="plate-subtext" id="plateSubtext" data-i18n="plate_subtext">Ready for transmission to national vehicle registry</span>
                             </div>
                         </div>
 
-                        <!-- 4. PROCÈS-VERBAL / RAPPORT OPÉRATIONNEL -->
+                        <!-- 4. OFFICIAL OPERATIONAL ENFORCEMENT REPORT -->
                         <div class="report-summary-card">
                             <div class="summary-header">
-                                <h4 data-i18n="report_title">📋 Rapport Opérationnel pour Officier de Contrôle</h4>
-                                <span class="summary-stamp" data-i18n="report_stamp">OFFICIEL</span>
+                                <h4 data-i18n="report_title">📋 Official Inspection Report for Enforcement Officer</h4>
+                                <span class="summary-stamp" data-i18n="report_stamp">OFFICIAL</span>
                             </div>
                             <div class="summary-content" id="reportSummaryContent">
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_legal_label">Constat Légal :</span>
-                                    <span class="r-value text-muted" id="rLegalStatus">⚪ En attente de scan ou capture vidéo</span>
+                                    <span class="r-label" data-i18n="r_legal_label">Legal Finding:</span>
+                                    <span class="r-value text-muted" id="rLegalStatus">⚪ Awaiting image scan or video frame capture</span>
                                 </div>
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_jurisdiction_label">Cadre Juridique :</span>
+                                    <span class="r-label" data-i18n="r_jurisdiction_label">Legal Framework:</span>
                                     <span class="r-value text-muted" id="rJurisdiction">--</span>
                                 </div>
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_penalty_label">Sanction Prévue :</span>
+                                    <span class="r-label" data-i18n="r_penalty_label">Applicable Penalty:</span>
                                     <span class="r-value text-muted" id="rPenalty">--</span>
                                 </div>
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_equip_label">Équipement constaté :</span>
+                                    <span class="r-label" data-i18n="r_equip_label">Observed Equipment:</span>
                                     <span class="r-value text-muted" id="rEquipStatus">--</span>
                                 </div>
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_plate_label">Immatriculation :</span>
+                                    <span class="r-label" data-i18n="r_plate_label">License Plate:</span>
                                     <span class="r-value font-mono text-muted" id="rPlateStatus">--</span>
                                 </div>
                                 <div class="report-row">
-                                    <span class="r-label" data-i18n="r_action_label">Action Système :</span>
-                                    <span class="r-value text-cyan" id="rActionStatus">Système prêt - Sélectionnez un échantillon ou capturez une caméra</span>
+                                    <span class="r-label" data-i18n="r_action_label">System Action:</span>
+                                    <span class="r-value text-cyan" id="rActionStatus">System ready - Select a sample or capture camera</span>
                                 </div>
                             </div>
 
                             <div class="summary-actions">
-                                <button class="btn btn-primary" id="copyReportBtn" data-i18n="btn_copy_report">📋 Copier le Procès-Verbal</button>
-                                <button class="btn btn-secondary" id="downloadProofBtn" data-i18n="btn_download_proof">💾 Exporter Dossier de Preuves</button>
+                                <button class="btn btn-primary" id="copyReportBtn" data-i18n="btn_copy_report">📋 Copy Official Report</button>
+                                <button class="btn btn-secondary" id="downloadProofBtn" data-i18n="btn_download_proof">💾 Export Evidence Dossier</button>
                             </div>
                         </div>
 
-                        <!-- 5. TABLEAU TÉLÉMÉTRIQUE DES OBJETS DÉTECTÉS -->
+                        <!-- 5. TARGET TELEMETRY TABLE -->
                         <div class="objects-table-wrapper">
                             <details class="tech-details" open>
-                                <summary><span data-i18n="table_summary_title">📊 Tableau Détaillé des Cibles Détectées</span> (<span id="detectedCountSpan">0</span> <span data-i18n="table_objects_count">objets</span>)</summary>
+                                <summary><span data-i18n="table_summary_title">📊 Detailed Target Telemetry Table</span> (<span id="detectedCountSpan">0</span> <span data-i18n="table_objects_count">objects</span>)</summary>
                                 <table class="results-table" id="resultsTable">
                                     <thead>
                                         <tr>
-                                            <th data-i18n="th_item">Élément Identifié</th>
-                                            <th data-i18n="th_confidence">Confiance</th>
-                                            <th data-i18n="th_coordinates">Coordonnées [x, y, l, h]</th>
-                                            <th data-i18n="th_status">Qualification</th>
+                                            <th data-i18n="th_item">Identified Element</th>
+                                            <th data-i18n="th_confidence">Confidence</th>
+                                            <th data-i18n="th_coordinates">Coordinates [x, y, w, h]</th>
+                                            <th data-i18n="th_status">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="resultsBody">
-                                        <!-- Rempli par app.js -->
+                                        <!-- Filled by app.js -->
                                     </tbody>
                                 </table>
                             </details>
                         </div>
 
-                        <!-- 6. INSPECTEUR API JSON (POUR AUDIT TECHNIQUE) -->
+                        <!-- 6. RAW JSON INSPECTOR (FOR TECHNICAL AUDIT) -->
                         <details class="json-accordion">
-                            <summary data-i18n="json_accordion_title">🔧 Charge Utile JSON Brute (POST /api/detect)</summary>
+                            <summary data-i18n="json_accordion_title">🔧 Raw JSON Payload (POST /api/detect)</summary>
                             <div class="json-inspector">
                                 <pre><code id="jsonResponse">{"status": "waiting_for_upload"}</code></pre>
                             </div>
@@ -296,114 +296,114 @@
         </section>
 
         <!-- ============================================================== -->
-        <!-- PANNEAU 2 : MODE VIDÉOSURVEILLANCE CAMÉRA CCTV (DIRECT DÉDIÉ)   -->
+        <!-- PANEL 2: CCTV SURVEILLANCE CAMERA MODE (DEDICATED LIVE FEED)   -->
         <!-- ============================================================== -->
         <section class="mode-panel" id="modeCameraPanel">
             
             <div class="cctv-full-workspace">
                 
-                <!-- Colonne Gauche : Grand Moniteur Vidéo 16:9 -->
+                <!-- Left: 16:9 Main CCTV Monitor Column -->
                 <div class="cctv-main-monitor-column">
                     <div class="cctv-card">
                         <div class="cctv-header-bar">
                             <div class="cctv-header-info">
                                 <div class="live-dot-indicator"></div>
-                                <h2 id="cctvCamTitle" data-i18n="cctv_cam_title">CAM-01 : Surveillance Carrefour Urbain (Trafic Réel 1080p)</h2>
-                                <span class="cctv-tag" data-i18n="cctv_tag_filter">Filtre IA : 100% Motos</span>
+                                <h2 id="cctvCamTitle" data-i18n="cctv_cam_title">CAM-01: Urban Intersection Surveillance (Real Traffic 1080p)</h2>
+                                <span class="cctv-tag" data-i18n="cctv_tag_filter">AI Filter: 100% Motorcycles</span>
                             </div>
                             <div class="cctv-status-tags">
-                                <span class="cctv-badge-model" data-i18n="cctv_engine_label">Moteur : best_cctv.pt</span>
+                                <span class="cctv-badge-model" data-i18n="cctv_engine_label">Engine: best_cctv.pt</span>
                                 <span class="cctv-badge-fps" id="cctvFpsText">30.0 FPS</span>
                             </div>
                         </div>
 
-                        <!-- Écran Moniteur CCTV -->
+                        <!-- CCTV Screen Monitor -->
                         <div class="cctv-screen-container">
-                            <img id="cctvLiveStream" src="/video/live_feed" alt="Flux Vidéo Motos en Direct" class="cctv-video-element">
+                            <img id="cctvLiveStream" src="/video/live_feed" alt="Live CCTV Video Feed" class="cctv-video-element">
                             <canvas id="cctvSimCanvas" width="640" height="360" class="cctv-sim-element hidden"></canvas>
                             
-                            <div class="cctv-hud-top-left hidden" id="cctvHudLocation" data-i18n="cctv_hud_location">CAM-01 CARREFOUR PRINCIPAL [TRAFIC REEL 1080p]</div>
+                            <div class="cctv-hud-top-left hidden" id="cctvHudLocation" data-i18n="cctv_hud_location">CAM-01 MAIN INTERSECTION [REAL TRAFFIC 1080p]</div>
                             <div class="cctv-hud-top-right hidden" id="cctvTime">11/10/2026 20:45:00</div>
                             <div class="cctv-hud-crosshair"></div>
                             
                             <div class="cctv-alert-bar hidden" id="cctvAlert">
-                                <span data-i18n="cctv_alert_banner">⚠️ ALERTE : INFRACTION MOTARD SANS CASQUE DÉTECTÉE EN DIRECT</span>
+                                <span data-i18n="cctv_alert_banner">⚠️ ALERT: MOTORCYCLE RIDER WITHOUT HELMET DETECTED LIVE</span>
                             </div>
                         </div>
 
-                        <!-- Barre de contrôles du flux -->
+                        <!-- Video Stream Control Bar -->
                         <div class="cctv-command-toolbar">
                             <div class="toolbar-left">
-                                <button class="btn btn-primary" id="cctvPlayBtn" data-i18n="cctv_btn_pause">⏸️ Pause Flux</button>
-                                <button class="btn btn-secondary" id="cctvModeBtn" data-i18n="cctv_btn_sim">🎨 Mode Simulateur 2D</button>
-                                <button class="btn btn-secondary" id="cctvSnapshotBtn" data-i18n="cctv_btn_capture">📸 Capturer la Frame pour Scan Immédiat</button>
+                                <button class="btn btn-primary" id="cctvPlayBtn" data-i18n="cctv_btn_pause">⏸️ Pause Stream</button>
+                                <button class="btn btn-secondary" id="cctvModeBtn" data-i18n="cctv_btn_sim">🎨 2D Simulator Mode</button>
+                                <button class="btn btn-secondary" id="cctvSnapshotBtn" data-i18n="cctv_btn_capture">📸 Capture Frame for Instant Scan</button>
                                 
                                 <div class="cctv-source-selector">
-                                    <label for="cctvSourceSelect" class="cctv-source-label">📹 Source Vidéo :</label>
-                                    <select id="cctvSourceSelect" class="cctv-source-dropdown" title="Choisir la source vidéo ou caméra CCTV">
-                                        <option value="saigon_part.webm" selected>📹 CAM-01 : Carrefour Urbain 1080p (Trafic Réel 100% Motos)</option>
-                                        <option value="0">🔴 DIRECT : Caméra PC / Webcam Physique en Direct</option>
-                                        <option value="cctv_motorcycle_real.webm">📹 CAM-02 : Voie de Circulation Réelle (Motos en Mouvement)</option>
-                                        <option value="real_traffic_cars.mp4">📹 CAM-03 : Surveillance Voitures Autoroute (Flux Réel)</option>
-                                        <option value="custom_url">🌐 Flux Réseau RTSP / Caméra IP en Direct...</option>
+                                    <label for="cctvSourceSelect" class="cctv-source-label">📹 Video Source:</label>
+                                    <select id="cctvSourceSelect" class="cctv-source-dropdown" title="Select CCTV camera or video source">
+                                        <option value="saigon_part.webm" selected>📹 CAM-01: Urban Intersection 1080p (Real Motorcycle Traffic)</option>
+                                        <option value="0">🔴 DIRECT: Local PC Camera / Physical Webcam</option>
+                                        <option value="cctv_motorcycle_real.webm">📹 CAM-02: Live Traffic Lane (Moving Motorcycles)</option>
+                                        <option value="real_traffic_cars.mp4">📹 CAM-03: Highway Vehicle Surveillance (Continuous Flow)</option>
+                                        <option value="custom_url">🌐 Network RTSP Stream / Direct IP Camera...</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="toolbar-right">
                                 <a href="/video/demo" target="_blank" class="btn btn-secondary" data-i18n="cctv_btn_demo">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 3v12"/></svg>
-                                    Vidéo Démo MP4
+                                    Demo MP4 Video
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Colonne Droite : Journal d'Événements & Télémétrie en Direct -->
+                <!-- Right: Chronological Log & Real-Time Telemetry Column -->
                 <div class="cctv-feed-log-column">
                     <div class="cctv-log-card">
                         <div class="log-card-header">
-                            <h3 data-i18n="cctv_log_title">🚨 Détections en Temps Réel (Flux CCTV)</h3>
-                            <span class="log-count-pill" id="liveEventCount" data-i18n="cctv_log_count">12 événements</span>
+                            <h3 data-i18n="cctv_log_title">🚨 Real-Time Detections (CCTV Stream)</h3>
+                            <span class="log-count-pill" id="liveEventCount" data-i18n="cctv_log_count">Live Stream</span>
                         </div>
-                        <p class="log-desc" data-i18n="cctv_log_desc">Journal chronologique des motards interceptés par la caméra CAM-02 :</p>
+                        <p class="log-desc" data-i18n="cctv_log_desc">Chronological log of riders intercepted by camera CAM-02:</p>
                         
                         <div class="cctv-events-stream" id="cctvEventsStream">
-                            <!-- Flux d'événements dynamiques fidèles à la vidéo CCTV -->
+                            <!-- Live events stream -->
                             <div class="event-entry compliant">
                                 <div class="event-time">20:45:12</div>
                                 <div class="event-data">
-                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Conforme : Port du Casque Validé</div>
-                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plaque</span> : <span class="font-mono">66-K1 0315</span> • <span data-i18n="event_conf_lbl">Confiance</span> : 94%</div>
+                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Compliant: Approved Helmet Verified</div>
+                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plate</span> : <span class="font-mono">66-K1 0315</span> • <span data-i18n="event_conf_lbl">Confidence</span> : 94%</div>
                                 </div>
                             </div>
                             <div class="event-entry compliant">
                                 <div class="event-time">20:44:50</div>
                                 <div class="event-data">
-                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Conforme : Port du Casque Validé</div>
-                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plaque</span> : <span class="font-mono">59-F1 350.97</span> • <span data-i18n="event_conf_lbl">Confiance</span> : 96%</div>
+                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Compliant: Approved Helmet Verified</div>
+                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plate</span> : <span class="font-mono">59-F1 350.97</span> • <span data-i18n="event_conf_lbl">Confidence</span> : 96%</div>
                                 </div>
                             </div>
                             <div class="event-entry compliant">
                                 <div class="event-time">20:44:18</div>
                                 <div class="event-data">
-                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Conforme : Port du Casque Validé</div>
-                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plaque</span> : <span class="font-mono">66-K1 0315</span> • <span data-i18n="event_conf_lbl">Confiance</span> : 91%</div>
+                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Compliant: Approved Helmet Verified</div>
+                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plate</span> : <span class="font-mono">66-K1 0315</span> • <span data-i18n="event_conf_lbl">Confidence</span> : 91%</div>
                                 </div>
                             </div>
                             <div class="event-entry compliant">
                                 <div class="event-time">20:43:40</div>
                                 <div class="event-data">
-                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Conforme : Port du Casque Validé</div>
-                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plaque</span> : <span class="font-mono">59-F1 350.97</span> • <span data-i18n="event_conf_lbl">Confiance</span> : 92%</div>
+                                    <div class="event-title text-emerald" data-i18n="event_helmet_ok">Compliant: Approved Helmet Verified</div>
+                                    <div class="event-details"><span data-i18n="event_plate_lbl">Plate</span> : <span class="font-mono">59-F1 350.97</span> • <span data-i18n="event_conf_lbl">Confidence</span> : 92%</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Boîte d'aide -->
+                        <!-- CCTV Tip Box -->
                         <div class="cctv-tip-box">
                             <span class="tip-icon">💡</span>
-                            <span class="tip-text" data-i18n="cctv_tip_text">Cliquez sur <strong>"📸 Capturer la Frame"</strong> à tout moment pour basculer la scène en haute définition dans le <strong>Mode Analyse Image</strong>.</span>
+                            <span class="tip-text" data-i18n="cctv_tip_text">Click <strong>"📸 Capture Frame"</strong> at any time to inspect the frame in high-definition inside <strong>Image Analysis Mode</strong>.</span>
                         </div>
                     </div>
                 </div>
@@ -417,8 +417,8 @@
     <!-- Footer -->
     <footer class="app-footer">
         <div class="footer-container">
-            <p id="footerCopyright" data-i18n="footer_copyright">&copy; 2026 SafeCityAI - Système Autonome de Détection et Sécurité Routière / Autonomous Road Safety & Traffic Enforcement System. Tous droits réservés / All rights reserved.</p>
-            <p id="footerAuthor" data-i18n="footer_author">Auteur & Développeur / Developer : <strong>ratovoarisoaricardo</strong> &bull; Projet Vision par Ordinateur / Computer Vision Engineering Minor Project &bull; Architecture Double-Modèle YOLOv5 (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR.</p>
+            <p id="footerCopyright" data-i18n="footer_copyright">&copy; 2026 SafeCityAI - Autonomous Road Safety & Traffic Enforcement System. All rights reserved.</p>
+            <p id="footerAuthor" data-i18n="footer_author">Author & Developer: <strong>ratovoarisoaricardo</strong> &bull; Computer Vision Engineering Minor Project &bull; Dual-Model YOLOv5 Architecture (best_image.pt 🔒 & best_cctv.pt) + ALPR EasyOCR.</p>
         </div>
     </footer>
 

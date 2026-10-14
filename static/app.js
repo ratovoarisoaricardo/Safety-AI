@@ -6,9 +6,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
-    // 0. Système Bilingue & Internationalisation (FR / EN)
+    // 0. Bilingue & Internationalisation (Default: English)
     // ----------------------------------------------------
-    let currentLang = localStorage.getItem('safecity_lang') || 'fr';
+    let currentLang = localStorage.getItem('safecity_lang') || 'en';
     const langBtnFr = document.getElementById('langBtnFr');
     const langBtnEn = document.getElementById('langBtnEn');
     let lastScanData = null;
@@ -183,12 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const dict = i18n[lang] || i18n.fr;
+        const dict = i18n[lang] || i18n.en;
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key]) {
                 el.innerHTML = dict[key];
             }
+        });
+
+        // Update gallery items dynamically
+        document.querySelectorAll('.gallery-item-label').forEach((lbl, idx) => {
+            const numStr = String(idx + 1).padStart(2, '0');
+            lbl.textContent = (lang === 'fr' ? 'Scénario ' : 'Scenario ') + numStr;
         });
 
         if (lastScanData) {
@@ -357,16 +363,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeGallery() {
         if (!galleryGrid) return;
         galleryGrid.innerHTML = '';
+        const isFr = (currentLang === 'fr');
         for (let i = 1; i <= 6; i++) {
             const numStr = String(i).padStart(2, '0');
             const filename = `sample_${numStr}.png`;
             const url = `/static/samples/${filename}`;
+            const scLabel = (isFr ? 'Scénario ' : 'Scenario ') + numStr;
 
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.innerHTML = `
-                <img src="${url}" alt="Scénario ${numStr}">
-                <div class="gallery-item-label">Scénario ${numStr}</div>
+                <img src="${url}" alt="${scLabel}">
+                <div class="gallery-item-label">${scLabel}</div>
             `;
             item.addEventListener('click', () => {
                 selectSampleImage(url, filename);
@@ -376,11 +384,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectSampleImage(url, filename) {
-        jsonResponse.textContent = `Chargement de ${filename}...\nPréparation de l'inférence neuronale...`;
+        const isFr = (currentLang === 'fr');
+        jsonResponse.textContent = isFr
+            ? `Chargement de ${filename}...\nPréparation de l'inférence neuronale...`
+            : `Loading ${filename}...\nPreparing neural inference...`;
 
         fetch(url)
             .then(res => {
-                if (!res.ok) throw new Error("Image non trouvée");
+                if (!res.ok) throw new Error(isFr ? "Image non trouvée" : "Image not found");
                 return res.blob();
             })
             .then(blob => {
@@ -388,8 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleUploadedFile(file);
             })
             .catch(err => {
-                console.error("Erreur de chargement du scénario:", err);
-                alert("Impossible de charger l'image d'échantillon.");
+                console.error("Scenario load error:", err);
+                alert(isFr ? "Impossible de charger l'image d'échantillon." : "Unable to load sample image.");
             });
     }
 
