@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drop_text: "Glissez-déposez une photo ici ou <span>parcourez vos fichiers</span>",
             drop_subtext: "Formats acceptés : PNG, JPG, JPEG (Haute résolution recommandée)",
             gallery_title: "Scénarios Réels de Circulation Disponibles (1 Clic) :",
-            gallery_badge: "Motos • Casques • Plaques",
+            gallery_badge: "12 Scénarios • Motos • Casques • Plaques",
             btn_toggle_boxes: "👁️ Masquer / Afficher Boîtes",
             btn_new_scan: "🔄 Scanner une Autre Image",
             visual_card_title: "Cliché Routier Annoté par l'IA",
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drop_text: "Drag and drop a photo here or <span>browse your files</span>",
             drop_subtext: "Accepted formats: PNG, JPG, JPEG (High resolution recommended)",
             gallery_title: "Real Traffic Scenarios Available (1 Click):",
-            gallery_badge: "Motorcycles • Helmets • Plates",
+            gallery_badge: "12 Scenarios • Motorcycles • Helmets • Plates",
             btn_toggle_boxes: "👁️ Hide / Show Boxes",
             btn_new_scan: "🔄 Scan Another Image",
             visual_card_title: "AI-Annotated Traffic Snapshot",
@@ -192,10 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Update gallery items dynamically
-        document.querySelectorAll('.gallery-item-label').forEach((lbl, idx) => {
-            const numStr = String(idx + 1).padStart(2, '0');
-            lbl.textContent = (lang === 'fr' ? 'Scénario ' : 'Scenario ') + numStr;
-        });
+        initializeGallery();
 
         if (lastScanData) {
             renderDetailedScanResults(lastScanData);
@@ -358,29 +355,46 @@ document.addEventListener('DOMContentLoaded', () => {
     checkEngineStatus();
 
     // ----------------------------------------------------
-    // 4. Initialisation de la Galerie de Tests Rapides
+    // 4. Initialisation de la Galerie de Tests Rapides (12 Scénarios)
     // ----------------------------------------------------
+    const SAMPLE_SCENARIOS = [
+        { id: 1, name_en: "Solo Rider", name_fr: "Motard Solo", desc: "Urban motorcycle rider inspection" },
+        { id: 2, name_en: "Highway Rider", name_fr: "Moto Voie Rapide", desc: "KTM sports motorcycle in motion" },
+        { id: 3, name_en: "City Intersection", name_fr: "Carrefour Urbain", desc: "Urban intersection two-wheelers" },
+        { id: 4, name_en: "Dual Riders Check", name_fr: "Duo Motard & Passager", desc: "Passenger compliance verification" },
+        { id: 5, name_en: "Dense Traffic Corridor", name_fr: "Couloir Dense & Plaque", desc: "Heavy mixed traffic with visible plate" },
+        { id: 6, name_en: "Frontal Scooter Crossing", name_fr: "Scooter de Face", desc: "Frontal angle intersection transit" },
+        { id: 7, name_en: "Violation: No Helmet", name_fr: "Infraction: Sans Casque", desc: "Rider operating without approved helmet" },
+        { id: 8, name_en: "Urban Commuters & ALPR", name_fr: "Motards & Plaque FFI", desc: "7 targets detected with license plate" },
+        { id: 9, name_en: "Intersection Infraction", name_fr: "Infraction au Carrefour", desc: "Motorcycle violation under traffic light" },
+        { id: 10, name_en: "Multi-Rider Lane", name_fr: "Voie Multi-Motards", desc: "Multiple concurrent two-wheeler riders" },
+        { id: 11, name_en: "Dual Commuters & Plate", name_fr: "Duo Transit & Plaque 68-K0", desc: "Two-wheeler commuters with ALPR plate" },
+        { id: 12, name_en: "Intersection Flow & Plate", name_fr: "Flux Carrefour & Plaque 68-K7", desc: "Urban traffic flow with plate extraction" }
+    ];
+
     function initializeGallery() {
         if (!galleryGrid) return;
         galleryGrid.innerHTML = '';
         const isFr = (currentLang === 'fr');
-        for (let i = 1; i <= 6; i++) {
-            const numStr = String(i).padStart(2, '0');
+        SAMPLE_SCENARIOS.forEach(sc => {
+            const numStr = String(sc.id).padStart(2, '0');
             const filename = `sample_${numStr}.png`;
             const url = `/static/samples/${filename}`;
-            const scLabel = (isFr ? 'Scénario ' : 'Scenario ') + numStr;
+            const title = isFr ? sc.name_fr : sc.name_en;
+            const scLabel = `${numStr} • ${title}`;
 
             const item = document.createElement('div');
             item.className = 'gallery-item';
+            item.title = `${scLabel} - ${sc.desc}`;
             item.innerHTML = `
-                <img src="${url}" alt="${scLabel}">
+                <img src="${url}" alt="${scLabel}" loading="lazy">
                 <div class="gallery-item-label">${scLabel}</div>
             `;
             item.addEventListener('click', () => {
                 selectSampleImage(url, filename);
             });
             galleryGrid.appendChild(item);
-        }
+        });
     }
 
     function selectSampleImage(url, filename) {

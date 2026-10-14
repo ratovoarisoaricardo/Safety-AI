@@ -627,14 +627,17 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 13, 22, 0.9);
+    background: rgba(10, 13, 22, 0.92);
     color: var(--text-primary);
-    font-size: 0.72rem;
+    font-size: 0.70rem;
     font-weight: 600;
     font-family: var(--font-mono);
     text-align: center;
-    padding: 3px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 6px;
+    border-top: 1px solid rgba(0, 240, 255, 0.2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ============================================================== */
