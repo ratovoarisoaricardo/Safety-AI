@@ -209,13 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     let currentRegion = localStorage.getItem('safecity_region') || 'AUTO';
     const regionBtnAuto = document.getElementById('regionBtnAuto');
+    const regionBtnCh = document.getElementById('regionBtnCh');
     const regionBtnIn = document.getElementById('regionBtnIn');
     const regionBtnFr = document.getElementById('regionBtnFr');
 
     function setRegion(region) {
         currentRegion = region;
         localStorage.setItem('safecity_region', region);
-        [regionBtnAuto, regionBtnIn, regionBtnFr].forEach(btn => {
+        [regionBtnAuto, regionBtnCh, regionBtnIn, regionBtnFr].forEach(btn => {
             if (!btn) return;
             if (btn.getAttribute('data-region') === region) {
                 btn.classList.add('active');
@@ -238,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (regionBtnAuto) regionBtnAuto.addEventListener('click', () => setRegion('AUTO'));
+    if (regionBtnCh) regionBtnCh.addEventListener('click', () => setRegion('CH'));
     if (regionBtnIn) regionBtnIn.addEventListener('click', () => setRegion('IN'));
     if (regionBtnFr) regionBtnFr.addEventListener('click', () => setRegion('FR'));
     setRegion(currentRegion);
