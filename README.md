@@ -1,3 +1,14 @@
+---
+title: Safety AI Traffic Enforcement Console
+emoji: 🚦
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # 🚦 Safety AI — Autonomous Road Safety & AI Traffic Enforcement Console
 
 <div align="center">

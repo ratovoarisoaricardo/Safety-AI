@@ -593,8 +593,9 @@ def status():
 if __name__ == '__main__':
     print("=" * 70)
     print(" [READY] Serveur Safety AI Haute Performance en ligne !")
-    print(" [URL]   Ouvrez http://localhost:5000 dans votre navigateur.")
+    port = int(os.environ.get('PORT', 7860 if os.environ.get('SPACE_ID') else 5000))
+    print(f" [URL]   Ouvrez http://localhost:{port} dans votre navigateur.")
     print(" [INFO]  Moteur Asynchrone 30 FPS CCTV & ALPR Multi-Régions activé.")
     print("=" * 70)
     # Exécution avec threaded=True pour garantir que le streaming ne bloque jamais l'API
-    app.run(host='0.0.0.0', port=5000, threaded=True, debug=False)
+    app.run(host='0.0.0.0', port=port, threaded=True, debug=False)
