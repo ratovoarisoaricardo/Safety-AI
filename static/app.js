@@ -6,13 +6,189 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
-    // 0. Bilingue & Internationalisation (Default: English)
+    // 0. Références du DOM
     // ----------------------------------------------------
-    let currentLang = localStorage.getItem('safecity_lang') || 'en';
     const langBtnFr = document.getElementById('langBtnFr');
     const langBtnEn = document.getElementById('langBtnEn');
-    let lastScanData = null;
+    const regionBtnAuto = document.getElementById('regionBtnAuto');
+    const regionBtnCh = document.getElementById('regionBtnCh');
+    const regionBtnIn = document.getElementById('regionBtnIn');
+    const regionBtnFr = document.getElementById('regionBtnFr');
 
+    const tabModeImage = document.getElementById('tabModeImage');
+    const tabModeCamera = document.getElementById('tabModeCamera');
+    const modeImagePanel = document.getElementById('modeImagePanel');
+    const modeCameraPanel = document.getElementById('modeCameraPanel');
+
+    const scanInputSection = document.getElementById('scanInputSection');
+    const scanResultsWorkspace = document.getElementById('scanResultsWorkspace');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const galleryGrid = document.getElementById('galleryGrid');
+
+    const sourceImage = document.getElementById('sourceImage');
+    const detectionCanvas = document.getElementById('detectionCanvas');
+    const newScanBtn = document.getElementById('newScanBtn');
+    const toggleBoxesBtn = document.getElementById('toggleBoxesBtn');
+
+    // Tags & Métadonnées
+    const scanFilenameTag = document.getElementById('scanFilenameTag');
+    const scanDimensionsTag = document.getElementById('scanDimensionsTag');
+
+    // Résultat du Scan Détaillé
+    const verdictBanner = document.getElementById('verdictBanner');
+    const verdictIcon = document.getElementById('verdictIcon');
+    const verdictBadge = document.getElementById('verdictBadge');
+    const verdictConfidence = document.getElementById('verdictConfidence');
+    const verdictTitle = document.getElementById('verdictTitle');
+    const verdictDescription = document.getElementById('verdictDescription');
+
+    const evidenceCardsContainer = document.getElementById('evidenceCardsContainer');
+    const plateRecognitionCard = document.getElementById('plateRecognitionCard');
+    const plateBadgeMetal = document.getElementById('plateBadgeMetal');
+    const plateCountryStrip = document.getElementById('plateCountryStrip');
+    const plateTextVal = document.getElementById('plateTextVal');
+
+    const rLegalStatus = document.getElementById('rLegalStatus');
+    const rJurisdiction = document.getElementById('rJurisdiction');
+    const rPenalty = document.getElementById('rPenalty');
+    const rEquipStatus = document.getElementById('rEquipStatus');
+    const rPlateStatus = document.getElementById('rPlateStatus');
+    const rActionStatus = document.getElementById('rActionStatus');
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    const downloadProofBtn = document.getElementById('downloadProofBtn');
+
+    const resultsBody = document.getElementById('resultsBody');
+    const detectedCountSpan = document.getElementById('detectedCountSpan');
+    const jsonResponse = document.getElementById('jsonResponse');
+    const totalViolationsCounter = document.getElementById('totalViolationsCounter');
+
+    let currentDetections = [];
+    let showBoxes = true;
+    let detectionsLogged = 1482;
+    let lastScanData = null;
+    let currentLang = localStorage.getItem('safecity_lang') || 'en';
+    let currentRegion = localStorage.getItem('safecity_region') || 'AUTO';
+
+    // ----------------------------------------------------
+    // 1. Navigation entre les Modes (Onglets Principaux)
+    // ----------------------------------------------------
+    function switchMode(targetMode) {
+        if (targetMode === 'image') {
+            if (tabModeImage) tabModeImage.classList.add('active');
+            if (tabModeCamera) tabModeCamera.classList.remove('active');
+            if (modeImagePanel) modeImagePanel.classList.add('active');
+            if (modeCameraPanel) modeCameraPanel.classList.remove('active');
+        } else if (targetMode === 'camera') {
+            if (tabModeCamera) tabModeCamera.classList.add('active');
+            if (tabModeImage) tabModeImage.classList.remove('active');
+            if (modeCameraPanel) modeCameraPanel.classList.add('active');
+            if (modeImagePanel) modeImagePanel.classList.remove('active');
+        }
+    }
+
+    if (tabModeImage && tabModeCamera) {
+        tabModeImage.addEventListener('click', () => switchMode('image'));
+        tabModeCamera.addEventListener('click', () => switchMode('camera'));
+    }
+
+    // ----------------------------------------------------
+    // 2. Galerie de Tests Rapides (12 Scénarios)
+    // ----------------------------------------------------
+    const SAMPLE_SCENARIOS = [
+        { id: 1, file: "sample_01.png", name_en: "Solo Rider", name_fr: "Motard Solo", desc: "Urban motorcycle rider inspection" },
+        { id: 2, file: "sample_02.png", name_en: "Highway Rider", name_fr: "Moto Voie Rapide", desc: "KTM sports motorcycle in motion" },
+        { id: 3, file: "sample_03.png", name_en: "City Intersection", name_fr: "Carrefour Urbain", desc: "Urban intersection two-wheelers" },
+        { id: 4, file: "sample_04.png", name_en: "Dual Riders Check", name_fr: "Duo Motard & Passager", desc: "Passenger compliance verification" },
+        { id: 5, file: "sample_05.png", name_en: "Dense Traffic Corridor", name_fr: "Couloir Dense & Plaque", desc: "Heavy mixed traffic with visible plate" },
+        { id: 6, file: "sample_06.png", name_en: "Frontal Scooter Crossing", name_fr: "Scooter de Face", desc: "Frontal angle intersection transit" },
+        { id: 7, file: "sample_07.png", name_en: "Sport Biker Road Patrol", name_fr: "Patrouille Sportive", desc: "High-speed road motorcycle inspection" },
+        { id: 8, file: "sample_08.png", name_en: "Urban Commuters & ALPR", name_fr: "Motards & Plaque FFI", desc: "7 targets detected with license plate" },
+        { id: 9, file: "sample_09.png", name_en: "Asian Scooter Traffic", name_fr: "Flux Urbain Scooters", desc: "Dense urban scooter flow with plate" },
+        { id: 10, file: "sample_10.png", name_en: "Dual Sports Bikers", name_fr: "Duo Motards Sportifs", desc: "Two motorcycle riders in motion on mountain pass" },
+        { id: 11, file: "sample_11.png", name_en: "Urban Cruiser Patrol", name_fr: "Patrouille Cruiser Urbain", desc: "Cruiser rider equipped with safety helmet" },
+        { id: 12, file: "sample_12.png", name_en: "City Traffic & ALPR", name_fr: "Circulation Urbaine & Plaque", desc: "Heavy urban motorcycle transit with ALPR extraction" }
+    ];
+
+    function initializeGallery() {
+        if (!galleryGrid) return;
+        galleryGrid.innerHTML = '';
+        const isFr = (currentLang === 'fr');
+        SAMPLE_SCENARIOS.forEach((sc, idx) => {
+            const numStr = String(idx + 1).padStart(2, '0');
+            const filename = sc.file || `sample_${numStr}.png`;
+            const url = `/static/samples/${filename}`;
+            const title = isFr ? sc.name_fr : sc.name_en;
+            const scLabel = `${numStr} • ${title}`;
+
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.title = `${scLabel} - ${sc.desc}`;
+            item.innerHTML = `
+                <img src="${url}" alt="${scLabel}" loading="lazy">
+                <div class="gallery-item-label">${scLabel}</div>
+            `;
+            item.addEventListener('click', () => {
+                selectSampleImage(url, filename);
+            });
+            galleryGrid.appendChild(item);
+        });
+    }
+
+    function selectSampleImage(url, filename) {
+        const isFr = (currentLang === 'fr');
+        if (jsonResponse) {
+            jsonResponse.textContent = isFr
+                ? `Chargement de ${filename}...\nPréparation de l'inférence neuronale...`
+                : `Loading ${filename}...\nPreparing neural inference...`;
+        }
+
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error(isFr ? "Image non trouvée" : "Image not found");
+                return res.blob();
+            })
+            .then(blob => {
+                const file = new File([blob], filename, { type: "image/png" });
+                handleUploadedFile(file);
+            })
+            .catch(err => {
+                console.error("Scenario load error:", err);
+                alert(isFr ? "Impossible de charger l'image d'échantillon." : "Unable to load sample image.");
+            });
+    }
+
+    // ----------------------------------------------------
+    // 3. Statut du Moteur Backend IA
+    // ----------------------------------------------------
+    function checkEngineStatus() {
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const statusCard = document.getElementById('engineStatusCard');
+
+        fetch('/api/status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.yolov5_loaded) {
+                    if (statusDot) statusDot.className = 'status-dot active';
+                    const imgModel = data.image_model || 'best_image.pt';
+                    const cctvModel = data.cctv_is_dedicated ? data.cctv_model : 'best_cctv.pt';
+                    if (statusText) statusText.innerHTML = `<strong>Photos :</strong> ${imgModel} 🔒 &nbsp;|&nbsp; <strong>CCTV :</strong> ${cctvModel} &nbsp;|&nbsp; <strong>ALPR :</strong> Prêt`;
+                    if (statusCard) statusCard.title = "Protection des modèles active. Double moteur opérationnel.";
+                } else {
+                    if (statusDot) statusDot.className = 'status-dot warning';
+                    if (statusText) statusText.textContent = 'Mode Démonstration Actif';
+                }
+            })
+            .catch(() => {
+                if (statusDot) statusDot.className = 'status-dot warning';
+                if (statusText) statusText.textContent = 'Moteur Local Autonome (Client-Side)';
+            });
+    }
+
+    // ----------------------------------------------------
+    // 4. Bilingue & Internationalisation (Default: English)
+    // ----------------------------------------------------
     const i18n = {
         fr: {
             brand_subtitle: "Console Autonome de Sécurité Routière & Verbalisation par IA",
@@ -191,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update gallery items dynamically
+        // Mettre à jour les éléments de la galerie
         initializeGallery();
 
         if (lastScanData) {
@@ -204,18 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
         langBtnEn.addEventListener('click', () => setLanguage('en'));
     }
 
-    // Appliquer la langue initiale
-    setLanguage(currentLang);
-
     // ----------------------------------------------------
-    // 0.bis Système Régional / Juridique Adaptatif (Auto / Inde / France)
+    // 5. Système Régional / Juridique Adaptatif (Auto / Suisse / Inde / France)
     // ----------------------------------------------------
-    let currentRegion = localStorage.getItem('safecity_region') || 'AUTO';
-    const regionBtnAuto = document.getElementById('regionBtnAuto');
-    const regionBtnCh = document.getElementById('regionBtnCh');
-    const regionBtnIn = document.getElementById('regionBtnIn');
-    const regionBtnFr = document.getElementById('regionBtnFr');
-
     function setRegion(region) {
         currentRegion = region;
         localStorage.setItem('safecity_region', region);
@@ -245,180 +412,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (regionBtnCh) regionBtnCh.addEventListener('click', () => setRegion('CH'));
     if (regionBtnIn) regionBtnIn.addEventListener('click', () => setRegion('IN'));
     if (regionBtnFr) regionBtnFr.addEventListener('click', () => setRegion('FR'));
+
+    // Initialisation
+    setLanguage(currentLang);
     setRegion(currentRegion);
-
-    // ----------------------------------------------------
-    // 1. Navigation entre les Modes (Onglets Principaux)
-    // ----------------------------------------------------
-    const tabModeImage = document.getElementById('tabModeImage');
-    const tabModeCamera = document.getElementById('tabModeCamera');
-    const modeImagePanel = document.getElementById('modeImagePanel');
-    const modeCameraPanel = document.getElementById('modeCameraPanel');
-
-    function switchMode(targetMode) {
-        if (targetMode === 'image') {
-            tabModeImage.classList.add('active');
-            tabModeCamera.classList.remove('active');
-            modeImagePanel.classList.add('active');
-            modeCameraPanel.classList.remove('active');
-        } else if (targetMode === 'camera') {
-            tabModeCamera.classList.add('active');
-            tabModeImage.classList.remove('active');
-            modeCameraPanel.classList.add('active');
-            modeImagePanel.classList.remove('active');
-        }
-    }
-
-    if (tabModeImage && tabModeCamera) {
-        tabModeImage.addEventListener('click', () => switchMode('image'));
-        tabModeCamera.addEventListener('click', () => switchMode('camera'));
-    }
-
-    // ----------------------------------------------------
-    // 2. Éléments du Mode Analyse Image
-    // ----------------------------------------------------
-    const scanInputSection = document.getElementById('scanInputSection');
-    const scanResultsWorkspace = document.getElementById('scanResultsWorkspace');
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const galleryGrid = document.getElementById('galleryGrid');
-
-    const sourceImage = document.getElementById('sourceImage');
-    const detectionCanvas = document.getElementById('detectionCanvas');
-    const newScanBtn = document.getElementById('newScanBtn');
-    const toggleBoxesBtn = document.getElementById('toggleBoxesBtn');
-
-    // Tags & Métadonnées
-    const scanFilenameTag = document.getElementById('scanFilenameTag');
-    const scanDimensionsTag = document.getElementById('scanDimensionsTag');
-
-    // Résultat du Scan Détaillé
-    const verdictBanner = document.getElementById('verdictBanner');
-    const verdictIcon = document.getElementById('verdictIcon');
-    const verdictBadge = document.getElementById('verdictBadge');
-    const verdictConfidence = document.getElementById('verdictConfidence');
-    const verdictTitle = document.getElementById('verdictTitle');
-    const verdictDescription = document.getElementById('verdictDescription');
-
-    const evidenceCardsContainer = document.getElementById('evidenceCardsContainer');
-    const plateRecognitionCard = document.getElementById('plateRecognitionCard');
-    const plateBadgeMetal = document.getElementById('plateBadgeMetal');
-    const plateCountryStrip = document.getElementById('plateCountryStrip');
-    const plateTextVal = document.getElementById('plateTextVal');
-
-    const rLegalStatus = document.getElementById('rLegalStatus');
-    const rJurisdiction = document.getElementById('rJurisdiction');
-    const rPenalty = document.getElementById('rPenalty');
-    const rEquipStatus = document.getElementById('rEquipStatus');
-    const rPlateStatus = document.getElementById('rPlateStatus');
-    const rActionStatus = document.getElementById('rActionStatus');
-    const copyReportBtn = document.getElementById('copyReportBtn');
-    const downloadProofBtn = document.getElementById('downloadProofBtn');
-
-    const resultsBody = document.getElementById('resultsBody');
-    const detectedCountSpan = document.getElementById('detectedCountSpan');
-    const jsonResponse = document.getElementById('jsonResponse');
-    const totalViolationsCounter = document.getElementById('totalViolationsCounter');
-
-    let currentDetections = [];
-    let showBoxes = true;
-    let detectionsLogged = 1482;
-
-    // ----------------------------------------------------
-    // 3. Statut du Moteur Backend IA
-    // ----------------------------------------------------
-    function checkEngineStatus() {
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const statusCard = document.getElementById('engineStatusCard');
-
-        fetch('/api/status')
-            .then(res => res.json())
-            .then(data => {
-                if (data.yolov5_loaded) {
-                    statusDot.className = 'status-dot active';
-                    const imgModel = data.image_model || 'best_image.pt';
-                    const cctvModel = data.cctv_is_dedicated ? data.cctv_model : 'best_cctv.pt';
-                    statusText.innerHTML = `<strong>Photos :</strong> ${imgModel} 🔒 &nbsp;|&nbsp; <strong>CCTV :</strong> ${cctvModel} &nbsp;|&nbsp; <strong>ALPR :</strong> Prêt`;
-                    statusCard.title = "Protection des modèles active. Double moteur opérationnel.";
-                } else {
-                    statusDot.className = 'status-dot warning';
-                    statusText.textContent = 'Mode Démonstration Actif';
-                }
-            })
-            .catch(() => {
-                statusDot.className = 'status-dot warning';
-                statusText.textContent = 'Moteur Local Autonome (Client-Side)';
-            });
-    }
-
     checkEngineStatus();
-
-    // ----------------------------------------------------
-    // 4. Initialisation de la Galerie de Tests Rapides (12 Scénarios)
-    // ----------------------------------------------------
-    const SAMPLE_SCENARIOS = [
-        { id: 1, name_en: "Solo Rider", name_fr: "Motard Solo", desc: "Urban motorcycle rider inspection" },
-        { id: 2, name_en: "Highway Rider", name_fr: "Moto Voie Rapide", desc: "KTM sports motorcycle in motion" },
-        { id: 3, name_en: "City Intersection", name_fr: "Carrefour Urbain", desc: "Urban intersection two-wheelers" },
-        { id: 4, name_en: "Dual Riders Check", name_fr: "Duo Motard & Passager", desc: "Passenger compliance verification" },
-        { id: 5, name_en: "Dense Traffic Corridor", name_fr: "Couloir Dense & Plaque", desc: "Heavy mixed traffic with visible plate" },
-        { id: 6, name_en: "Frontal Scooter Crossing", name_fr: "Scooter de Face", desc: "Frontal angle intersection transit" },
-        { id: 7, name_en: "Violation: No Helmet", name_fr: "Infraction: Sans Casque", desc: "Rider operating without approved helmet" },
-        { id: 8, name_en: "Urban Commuters & ALPR", name_fr: "Motards & Plaque FFI", desc: "7 targets detected with license plate" },
-        { id: 9, name_en: "Intersection Infraction", name_fr: "Infraction au Carrefour", desc: "Motorcycle violation under traffic light" },
-        { id: 10, name_en: "Multi-Rider Lane", name_fr: "Voie Multi-Motards", desc: "Multiple concurrent two-wheeler riders" },
-        { id: 11, name_en: "Dual Commuters & Plate", name_fr: "Duo Transit & Plaque 68-K0", desc: "Two-wheeler commuters with ALPR plate" },
-        { id: 12, name_en: "Intersection Flow & Plate", name_fr: "Flux Carrefour & Plaque 68-K7", desc: "Urban traffic flow with plate extraction" }
-    ];
-
-    function initializeGallery() {
-        if (!galleryGrid) return;
-        galleryGrid.innerHTML = '';
-        const isFr = (currentLang === 'fr');
-        SAMPLE_SCENARIOS.forEach(sc => {
-            const numStr = String(sc.id).padStart(2, '0');
-            const filename = `sample_${numStr}.png`;
-            const url = `/static/samples/${filename}`;
-            const title = isFr ? sc.name_fr : sc.name_en;
-            const scLabel = `${numStr} • ${title}`;
-
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.title = `${scLabel} - ${sc.desc}`;
-            item.innerHTML = `
-                <img src="${url}" alt="${scLabel}" loading="lazy">
-                <div class="gallery-item-label">${scLabel}</div>
-            `;
-            item.addEventListener('click', () => {
-                selectSampleImage(url, filename);
-            });
-            galleryGrid.appendChild(item);
-        });
-    }
-
-    function selectSampleImage(url, filename) {
-        const isFr = (currentLang === 'fr');
-        jsonResponse.textContent = isFr
-            ? `Chargement de ${filename}...\nPréparation de l'inférence neuronale...`
-            : `Loading ${filename}...\nPreparing neural inference...`;
-
-        fetch(url)
-            .then(res => {
-                if (!res.ok) throw new Error(isFr ? "Image non trouvée" : "Image not found");
-                return res.blob();
-            })
-            .then(blob => {
-                const file = new File([blob], filename, { type: "image/png" });
-                handleUploadedFile(file);
-            })
-            .catch(err => {
-                console.error("Scenario load error:", err);
-                alert(isFr ? "Impossible de charger l'image d'échantillon." : "Unable to load sample image.");
-            });
-    }
-
-    initializeGallery();
 
     // ----------------------------------------------------
     // 5. Gestionnaire de Dépôt / Fichiers

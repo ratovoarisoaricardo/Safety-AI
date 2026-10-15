@@ -256,7 +256,10 @@ class SafetyDetector:
 
         try:
             print(f" [INFO] Initializing Deep Learning engine with {self.model_path} on {self.device}...")
-            ckpt = torch.load(self.model_path, map_location=self.device, weights_only=False)
+            try:
+                ckpt = torch.load(self.model_path, map_location=self.device, weights_only=False)
+            except TypeError:
+                ckpt = torch.load(self.model_path, map_location=self.device)
             self.model = ckpt['model'].float().eval().to(self.device)
             self.class_names = getattr(self.model, 'names', {
                 0: 'number plate', 1: 'rider', 2: 'with helmet', 3: 'without helmet'
@@ -274,6 +277,8 @@ class SafetyDetector:
         Runs high-precision inference on an input PIL Image.
         Returns a list of dicts: [ { 'class': str, 'confidence': float, 'box': [x, y, w, h] } ]
         """
+        if hasattr(pil_image, 'mode') and pil_image.mode != 'RGB':
+            pil_image = pil_image.convert('RGB')
         orig_w, orig_h = pil_image.size
         detections = []
 

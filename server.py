@@ -194,11 +194,14 @@ class AsyncVideoCamera:
                     time.sleep(0.05)
                     continue
                 else:
-                    # Bouclage sécurisé et propre du fichier vidéo sans blocage OpenCV
-                    cap.release()
-                    time.sleep(0.02)
-                    cap = cv2.VideoCapture(target_source)
-                    continue
+                    # Bouclage sécurisé et fluide du flux vidéo
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    ret, frame = cap.read()
+                    if not ret:
+                        cap.release()
+                        time.sleep(0.02)
+                        cap = cv2.VideoCapture(target_source)
+                        continue
 
             self.frame_count += 1
             now = time.time()
@@ -351,10 +354,14 @@ def set_region():
         region = 'AUTO'
     camera.set_region(region)
     alpr_engine.active_region = region
+    prof = REGIONAL_PROFILES.get(region if region != 'AUTO' else 'IN', REGIONAL_PROFILES.get('GLOBAL', {}))
     return jsonify({
         "success": True,
         "region": region,
-        "profile": REGIONAL_PROFILES.get(region if region != 'AUTO' else 'IN')
+        "name": prof.get('name'),
+        "name_fr": prof.get('name_fr'),
+        "flag": prof.get('flag'),
+        "profile": prof
     })
 
 @app.route('/api/set_cctv_video', methods=['POST'])
@@ -575,7 +582,7 @@ def status():
         "cctv_model": os.path.basename(cctv_detector.model_path),
         "cctv_is_dedicated": cctv_detector != image_detector,
         "cctv_fps": round(camera.current_fps, 1),
-        "cctv_video": os.path.basename(camera.video_path),
+        "cctv_video": os.path.basename(str(camera.video_path)),
         "cctv_region": camera.region,
         "cctv_violation": camera.violation_detected,
         "backup_secured": os.path.exists(os.path.join(BASE_DIR, 'weights', 'best_image_backup.pt')),
